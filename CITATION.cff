@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it using the metadata from this file.
+title: AGI-Pipeline
+version: 1.0.1
+date-released: '2026-06-05'
+license: MIT
+repository-code: https://github.com/OneFineStarstuff/AGI-Pipeline
+doi: 10.5281/zenodo.14504697
+authors:
+  - given-names: Kyaw T.
+    family-names: Tun
+abstract: >-
+  The AGI (Artificial General Intelligence) Pipeline is a comprehensive and
+  modular software framework designed to integrate various AI capabilities,
+  including Natural Language Processing (NLP), Computer Vision (CV), Multi-Modal
+  Processing, Reinforcement Learning (RL), and Real-Time Video Processing. This
+  pipeline leverages state-of-the-art models and techniques to provide a robust
+  and scalable solution for diverse AI tasks.
+keywords:
+  - Artificial General Intelligence (AGI)
+  - Natural Language Processing (NLP)
+  - Computer Vision (CV)
+  - Multi-Modal Processing
+  - Reinforcement Learning (RL)
+  - Real-Time Video Processing
+  - Data Augmentation
+  - Speech Recognition
+  - Text-to-Speech
+  - Machine Learning (ML)
+  - Data Science
+  - AI Pipeline
+  - Deep Learning
+  - Model Integration
+  - Cloud Deployment
+  - Interactive Visualization
+  - Voice Processing
+  - AI Applications
+  - Docker
+  - FastAPI
