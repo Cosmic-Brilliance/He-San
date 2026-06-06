@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MREF-GSIFI-WP-023 — Institutional-Grade AGI/ASI Governance Master Reference 2026-2030</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#0a0e1a;color:#e0e4f0;line-height:1.6}
+.header{background:linear-gradient(135deg,#0d1321 0%,#1b2838 50%,#0f172a 100%);border-bottom:2px solid #3b82f6;padding:24px 32px}
+.header h1{font-size:1.5em;color:#60a5fa;font-weight:700}
+.header .meta{color:#94a3b8;font-size:0.85em;margin-top:6px}
+.header .doc-ref{color:#fbbf24;font-weight:600}
+.nav{display:flex;gap:6px;padding:12px 32px;background:#111827;border-bottom:1px solid #1e293b;flex-wrap:wrap}
+.nav a{padding:6px 14px;border-radius:6px;color:#94a3b8;text-decoration:none;font-size:0.8em;cursor:pointer;transition:all 0.2s}
+.nav a:hover,.nav a.active{background:#1e3a5f;color:#60a5fa}
+.container{max-width:1400px;margin:0 auto;padding:24px 32px}
+.section{display:none;animation:fadeIn 0.3s ease-in}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:20px 0}
+.kpi{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:16px;text-align:center}
+.kpi .value{font-size:1.8em;font-weight:700;color:#60a5fa}
+.kpi .label{font-size:0.78em;color:#94a3b8;margin-top:4px}
+.kpi.green .value{color:#34d399}
+.kpi.gold .value{color:#fbbf24}
+.kpi.red .value{color:#f87171}
+.kpi.purple .value{color:#a78bfa}
+h2{color:#60a5fa;margin:24px 0 12px;font-size:1.3em;border-bottom:1px solid #1e293b;padding-bottom:8px}
+h3{color:#93c5fd;margin:16px 0 8px;font-size:1.1em}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:0.85em}
+th{background:#1e293b;color:#93c5fd;padding:10px 12px;text-align:left;font-weight:600}
+td{padding:8px 12px;border-bottom:1px solid #1e293b;color:#cbd5e1}
+tr:hover{background:#111827}
+.badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.75em;font-weight:600}
+.badge-green{background:#064e3b;color:#34d399}
+.badge-blue{background:#1e3a5f;color:#60a5fa}
+.badge-gold{background:#78350f;color:#fbbf24}
+.badge-red{background:#7f1d1d;color:#f87171}
+.badge-purple{background:#4c1d95;color:#c4b5fd}
+.card{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:18px;margin:12px 0}
+.card h4{color:#93c5fd;margin-bottom:8px;font-size:1em}
+.progress-bar{height:8px;background:#1e293b;border-radius:4px;overflow:hidden;margin:6px 0}
+.progress-bar .fill{height:100%;border-radius:4px;transition:width 0.6s}
+.col-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.col-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.status-active{color:#34d399}
+.status-draft{color:#fbbf24}
+.status-proposed{color:#94a3b8}
+@media(max-width:900px){.col-2,.col-3{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Institutional-Grade AGI/ASI Governance Master Reference 2026-2030</h1>
+  <div class="meta"><span class="doc-ref">MREF-GSIFI-WP-023 v1.0.0</span> | 2026-04-07 | CONFIDENTIAL — Board / C-Suite / Regulators | Fortune 500 · Global 2000 · G-SIFIs</div>
+</div>
+<div class="nav" id="nav">
+  <a onclick="show('exec')" class="active">Executive Summary</a>
+  <a onclick="show('regulatory')">Regulatory Compliance</a>
+  <a onclick="show('governance')">Governance Structure</a>
+  <a onclick="show('technical')">Technical Implementation</a>
+  <a onclick="show('financial')">Financial Services</a>
+  <a onclick="show('safety')">AGI Safety</a>
+  <a onclick="show('global')">Global Governance</a>
+  <a onclick="show('blueprint')">Master Blueprint</a>
+  <a onclick="show('implementation')">Implementation</a>
+  <a onclick="show('appendices')">Appendices</a>
+</div>
+<div class="container">
+
+<!-- EXECUTIVE SUMMARY -->
+<div class="section active" id="sec-exec">
+  <h2>Executive Summary</h2>
+  <div id="exec-context" class="card"></div>
+  <div class="kpi-grid" id="exec-kpis"></div>
+  <h3>Investment Summary</h3>
+  <div class="kpi-grid" id="exec-investment"></div>
+</div>
+
+<!-- REGULATORY COMPLIANCE -->
+<div class="section" id="sec-regulatory">
+  <h2>Regulatory Compliance Architecture — 8 Framework Integration</h2>
+  <div class="kpi-grid" id="reg-scores"></div>
+  <h3>Framework Details</h3>
+  <table id="reg-table"><thead><tr><th>Framework</th><th>Jurisdiction</th><th>OPA Rules</th><th>Sentinel Rules</th><th>Compliance %</th><th>Status</th></tr></thead><tbody></tbody></table>
+  <h3>Cross-Framework Overlap Matrix</h3>
+  <table id="overlap-table"><thead><tr><th>Framework Pair</th><th>Overlaps</th><th>Unique Left</th><th>Unique Right</th><th>Coverage</th></tr></thead><tbody></tbody></table>
+  <h3>Gap Analysis</h3>
+  <div class="kpi-grid" id="gap-kpis"></div>
+  <table id="gap-table"><thead><tr><th>ID</th><th>Description</th><th>Frameworks</th><th>Remediation</th><th>Timeline</th><th>Owner</th></tr></thead><tbody></tbody></table>
+</div>
+
+<!-- GOVERNANCE STRUCTURE -->
+<div class="section" id="sec-governance">
+  <h2>Multilayered AI Governance Structure — 8 Pillars</h2>
+  <div id="pillars-grid"></div>
+  <h3>Decision Hierarchy</h3>
+  <table id="hierarchy-table"><thead><tr><th>Level</th><th>Authority</th><th>Cadence</th><th>Escalation Trigger</th></tr></thead><tbody></tbody></table>
+  <h3>AGI Incident Escalation Phases</h3>
+  <table id="escalation-table"><thead><tr><th>Phase</th><th>SLA</th><th>Actions</th><th>Responsible</th></tr></thead><tbody></tbody></table>
+  <h3>Severity Levels</h3>
+  <table id="severity-table"><thead><tr><th>Level</th><th>Name</th><th>Description</th><th>Response</th><th>Example</th></tr></thead><tbody></tbody></table>
+</div>
+
+<!-- TECHNICAL IMPLEMENTATION -->
+<div class="section" id="sec-technical">
+  <h2>Technical Implementation — Reference Architecture & Trust Stack</h2>
+  <h3>Enterprise AI Governance Architecture v3.0</h3>
+  <table id="arch-table"><thead><tr><th>Layer</th><th>Components</th><th>Technology</th><th>Governance</th></tr></thead><tbody></tbody></table>
+  <h3>Enterprise Trust & Compliance Stack v2.0</h3>
+  <table id="trust-table"><thead><tr><th>Layer</th><th>Components</th><th>Standard</th></tr></thead><tbody></tbody></table>
+  <h3>Kafka ACL Governance — 12 Topics</h3>
+  <table id="kafka-table"><thead><tr><th>Topic</th><th>Partitions</th><th>Retention</th><th>ACL</th></tr></thead><tbody></tbody></table>
+  <h3>Terraform IaC — 8 Modules, 144 Resources</h3>
+  <div class="col-2">
+    <div><table id="tf-modules"><thead><tr><th>Module</th><th>Resources</th><th>Description</th></tr></thead><tbody></tbody></table></div>
+    <div><table id="tf-gates"><thead><tr><th>Gate</th><th>Tool</th><th>Blocks On</th></tr></thead><tbody></tbody></table></div>
+  </div>
+  <h3>Auditor Workflows</h3>
+  <table id="auditor-table"><thead><tr><th>Mode</th><th>Description</th><th>SLA</th><th>Tools</th></tr></thead><tbody></tbody></table>
+</div>
+
+<!-- FINANCIAL SERVICES -->
+<div class="section" id="sec-financial">
+  <h2>Financial Services AI Governance — G-SIFI Model Risk Management</h2>
+  <div class="kpi-grid" id="fs-kpis"></div>
+  <h3>Model Inventory by Category</h3>
+  <table id="model-table"><thead><tr><th>Category</th><th>Models</th><th>Tier</th><th>SR 11-7</th><th>Key Metric</th></tr></thead><tbody></tbody></table>
+  <h3>SR 11-7 Validation Stages</h3>
+  <table id="sr117-table"><thead><tr><th>Stage</th><th>Activities</th><th>Owner</th><th>Timeline</th><th>Artifacts</th></tr></thead><tbody></tbody></table>
+  <h3>Fair Lending Controls</h3>
+  <div id="fair-lending-card" class="card"></div>
+  <h3>EARL Maturity Model</h3>
+  <div id="earl-card" class="card"></div>
+</div>
+
+<!-- AGI SAFETY -->
+<div class="section" id="sec-safety">
+  <h2>Frontier AGI Safety — Trust-by-Design & Containment</h2>
+  <h3>Trust-by-Design Principles</h3>
+  <table id="tbd-table"><thead><tr><th>ID</th><th>Principle</th><th>Implementation</th><th>Status</th></tr></thead><tbody></tbody></table>
+  <h3>AGI Alignment Verification Protocol (AAVP)</h3>
+  <div class="kpi-grid" id="align-kpis"></div>
+  <table id="align-table"><thead><tr><th>Category</th><th>Tests</th><th>Threshold</th><th>Score</th><th>Status</th></tr></thead><tbody></tbody></table>
+  <h3>Containment Architecture — 5 Layers</h3>
+  <table id="contain-table"><thead><tr><th>Layer</th><th>Description</th><th>Controls</th><th>Status</th></tr></thead><tbody></tbody></table>
+  <h3>AGI Readiness Levels (ARL)</h3>
+  <table id="arl-table"><thead><tr><th>Level</th><th>Name</th><th>Description</th><th>Milestone</th></tr></thead><tbody></tbody></table>
+</div>
+
+<!-- GLOBAL GOVERNANCE -->
+<div class="section" id="sec-global">
+  <h2>Global Governance — ICGC, Compute Registry & Cross-Border Coordination</h2>
+  <h3>International Compute Governance Consortium (ICGC) — 15 Components</h3>
+  <table id="icgc-table"><thead><tr><th>ID</th><th>Name</th><th>Function</th><th>Status</th><th>Timeline</th></tr></thead><tbody></tbody></table>
+  <h3>Global Compute Registry</h3>
+  <table id="gcr-table"><thead><tr><th>Category</th><th>Count</th><th>Threshold</th><th>Requirement</th></tr></thead><tbody></tbody></table>
+  <h3>Cross-Border Coordination Mechanisms</h3>
+  <table id="xborder-table"><thead><tr><th>Mechanism</th><th>Description</th><th>Status</th><th>Participants</th></tr></thead><tbody></tbody></table>
+</div>
+
+<!-- MASTER BLUEPRINT -->
+<div class="section" id="sec-blueprint">
+  <h2>AGI Governance Master Blueprint — Enterprise · Frontier · Civilizational</h2>
+  <div id="scales-grid" class="col-3"></div>
+  <h3>Scalability Pathway</h3>
+  <table id="scale-table"><thead><tr><th>Level</th><th>Scope</th><th>Governance</th><th>Investment</th><th>Timeline</th></tr></thead><tbody></tbody></table>
+  <h3>Integration with Existing Frameworks</h3>
+  <table id="integration-table"><thead><tr><th>Framework</th><th>Integration</th><th>Touchpoints</th></tr></thead><tbody></tbody></table>
+</div>
+
+<!-- IMPLEMENTATION -->
+<div class="section" id="sec-implementation">
+  <h2>Implementation Timelines, Risk Assessment & Cost-Benefit Analysis</h2>
+  <div class="kpi-grid" id="impl-kpis"></div>
+  <h3>5-Phase Implementation Timeline (2026-2030)</h3>
+  <div id="phases-grid"></div>
+  <h3>Investment Breakdown</h3>
+  <table id="invest-table"><thead><tr><th>Category</th><th>5-Year Cost</th><th>NPV</th><th>IRR</th></tr></thead><tbody></tbody></table>
+  <h3>Annual Savings Breakdown</h3>
+  <table id="savings-table"><thead><tr><th>Category</th><th>Annual Saving</th><th>Description</th></tr></thead><tbody></tbody></table>
+  <h3>Top Risks</h3>
+  <table id="risk-table"><thead><tr><th>ID</th><th>Risk</th><th>Probability</th><th>Impact</th><th>Mitigation</th><th>Owner</th></tr></thead><tbody></tbody></table>
+  <h3>30/60/90-Day Rollout</h3>
+  <div id="rollout-grid" class="col-3"></div>
+</div>
+
+<!-- APPENDICES -->
+<div class="section" id="sec-appendices">
+  <h2>Appendices — Templates, Checklists & Reference Materials</h2>
+  <h3>Templates</h3>
+  <table id="tpl-table"><thead><tr><th>ID</th><th>Name</th><th>Format</th><th>Path</th></tr></thead><tbody></tbody></table>
+  <h3>Checklists</h3>
+  <table id="cl-table"><thead><tr><th>ID</th><th>Name</th><th>Items</th><th>Covers</th></tr></thead><tbody></tbody></table>
+  <h3>Reference Materials</h3>
+  <table id="ref-table"><thead><tr><th>Ref</th><th>Title</th><th>Path</th></tr></thead><tbody></tbody></table>
+</div>
+
+</div>
+<script>
+const API = '/api/master-ref';
+function show(id){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById('sec-'+id).classList.add('active');document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));event.target.classList.add('active');}
+function pct(v){return`<div class="progress-bar"><div class="fill" style="width:${v}%;background:${v>=90?'#34d399':v>=80?'#fbbf24':'#f87171'}"></div></div>`;}
+function badge(t,c){return`<span class="badge badge-${c}">${t}</span>`;}
+async function load(){
+  const [dash,reg,gaps,struct,esc,sev,arch,trust,kafka,tf,gates,aud,fs,cs,sr117,fl,earl,tbd,align,contain,arl,icgc,gcr,xb,bp,scale,integ,impl,invest,save,risks,rollout,app]=await Promise.all([
+    fetch(API+'/dashboard').then(r=>r.json()),fetch(API+'/regulatory/frameworks').then(r=>r.json()),fetch(API+'/regulatory/compliance-matrix/gaps').then(r=>r.json()),
+    fetch(API+'/governance-structure/pillars').then(r=>r.json()),fetch(API+'/governance-structure/escalation/phases').then(r=>r.json()),fetch(API+'/governance-structure/escalation/severity-levels').then(r=>r.json()),
+    fetch(API+'/technical/reference-architecture/layers').then(r=>r.json()),fetch(API+'/technical/trust-stack').then(r=>r.json()),fetch(API+'/technical/kafka-acl/topics').then(r=>r.json()),
+    fetch(API+'/technical/terraform/modules').then(r=>r.json()),fetch(API+'/technical/terraform/cicd-gates').then(r=>r.json()),fetch(API+'/technical/auditor-workflows').then(r=>r.json()),
+    fetch(API+'/financial-services/model-inventory').then(r=>r.json()),fetch(API+'/financial-services/credit-scoring').then(r=>r.json()),fetch(API+'/financial-services/credit-scoring/sr117').then(r=>r.json()),
+    fetch(API+'/financial-services/credit-scoring/fair-lending').then(r=>r.json()),fetch(API+'/financial-services/earl').then(r=>r.json()),
+    fetch(API+'/agi-safety/trust-by-design/principles').then(r=>r.json()),fetch(API+'/agi-safety/alignment').then(r=>r.json()),fetch(API+'/agi-safety/containment/layers').then(r=>r.json()),fetch(API+'/agi-safety/readiness-levels').then(r=>r.json()),
+    fetch(API+'/global-governance/icgc/components').then(r=>r.json()),fetch(API+'/global-governance/compute-registry/categories').then(r=>r.json()),fetch(API+'/global-governance/cross-border/mechanisms').then(r=>r.json()),
+    fetch(API+'/blueprint/scales').then(r=>r.json()),fetch(API+'/blueprint/scalability').then(r=>r.json()),fetch(API+'/blueprint/integration').then(r=>r.json()),
+    fetch(API+'/implementation/timeline/phases').then(r=>r.json()),fetch(API+'/implementation/cost-benefit/breakdown').then(r=>r.json()),fetch(API+'/implementation/cost-benefit/savings').then(r=>r.json()),
+    fetch(API+'/implementation/risks/top').then(r=>r.json()),fetch(API+'/implementation/rollout').then(r=>r.json()),fetch(API+'/appendices').then(r=>r.json())
+  ]);
+  const m=dash.keyMetrics;
+  document.getElementById('exec-context').innerHTML=`<h4>Strategic Thesis</h4><p style="color:#cbd5e1;font-style:italic">"The institutions that will dominate the 2030 economy are not those deploying the most AI, but those governing it best."</p><p style="margin-top:8px;color:#94a3b8">This master reference consolidates 22 governance documents (WP-001 through WP-022) into the single authoritative reference for 2026-2030, targeting Fortune 500, Global 2000, and 30 G-SIFIs.</p>`;
+  document.getElementById('exec-kpis').innerHTML=[
+    ['8','Governance Pillars','blue'],['8','Regulatory Frameworks','blue'],['482','OPA Rego Rules','green'],['1,247','Sentinel Rules','green'],['1.4M','Daily Policy Evals','purple'],['312','Production Models','gold'],['847','Total Models','gold'],['45K','Kafka Events/s','purple'],['15','ICGC Components','blue'],['144','Terraform Resources','blue'],['91.2%','Compliance Score','green'],['$68.4M','5-Year Investment','gold']
+  ].map(([v,l,c])=>`<div class="kpi ${c}"><div class="value">${v}</div><div class="label">${l}</div></div>`).join('');
+  document.getElementById('exec-investment').innerHTML=[['$68.4M','Total Investment','gold'],['$118.7M','Net Present Value','green'],['42.1%','IRR','green'],['2.1 yr','Payback Period','blue'],['$52.3M','Annual Savings','green'],['94%','Audit Time Reduction','purple']].map(([v,l,c])=>`<div class="kpi ${c}"><div class="value">${v}</div><div class="label">${l}</div></div>`).join('');
+
+  // Regulatory
+  document.getElementById('reg-scores').innerHTML=reg.map(f=>`<div class="kpi ${f.complianceScore>=93?'green':f.complianceScore>=88?'gold':'red'}"><div class="value">${f.complianceScore}%</div><div class="label">${f.name.split(' ').slice(0,3).join(' ')}</div></div>`).join('');
+  document.querySelector('#reg-table tbody').innerHTML=reg.map(f=>`<tr><td><strong>${f.name}</strong></td><td>${f.jurisdiction}</td><td>${f.opaRules}</td><td>${f.sentinelRules}</td><td>${f.complianceScore}% ${pct(f.complianceScore)}</td><td>${badge(f.status.split('—')[0].trim(),f.complianceScore>=90?'green':'gold')}</td></tr>`).join('');
+  const overlaps=await fetch(API+'/regulatory/compliance-matrix/overlaps').then(r=>r.json());
+  document.querySelector('#overlap-table tbody').innerHTML=overlaps.map(o=>`<tr><td>${o.pair}</td><td>${o.overlaps}</td><td>${o.uniqueLeft}</td><td>${o.uniqueRight}</td><td>${o.coverageScore}% ${pct(o.coverageScore)}</td></tr>`).join('');
+  document.getElementById('gap-kpis').innerHTML=[[''+gaps.criticalGaps,'Critical Gaps','red'],[''+gaps.highGaps,'High Gaps','gold'],[''+gaps.mediumGaps,'Medium Gaps','blue'],[''+gaps.totalGaps,'Total Gaps','purple']].map(([v,l,c])=>`<div class="kpi ${c}"><div class="value">${v}</div><div class="label">${l}</div></div>`).join('');
+  document.querySelector('#gap-table tbody').innerHTML=gaps.topCriticalGaps.map(g=>`<tr><td>${badge(g.id,'red')}</td><td>${g.description}</td><td>${g.frameworks.join(', ')}</td><td>${g.remediation}</td><td>${g.timeline}</td><td>${g.owner}</td></tr>`).join('');
+
+  // Governance Structure
+  document.getElementById('pillars-grid').innerHTML=struct.map(p=>`<div class="card"><h4>${p.id}: ${p.name}</h4><p style="color:#94a3b8;font-size:0.85em">${p.function}</p><p style="margin-top:6px"><strong>Owner:</strong> ${p.owner} | <strong>Layer:</strong> ${badge(p.layer,'blue')} | <strong>Target:</strong> ${p.maturityTarget}</p><p style="margin-top:4px;font-size:0.82em;color:#64748b">${p.keyControls.join(' · ')}</p></div>`).join('');
+  const hier=await fetch(API+'/governance-structure/decision-hierarchy').then(r=>r.json());
+  document.querySelector('#hierarchy-table tbody').innerHTML=hier.levels.map(l=>`<tr><td>${badge('L'+l.level,'blue')} ${l.name}</td><td>${l.authority}</td><td>${l.cadence}</td><td>${l.escalationTrigger}</td></tr>`).join('');
+  document.querySelector('#escalation-table tbody').innerHTML=esc.map(e=>`<tr><td>${badge(e.phase,'purple')}</td><td>${e.sla}</td><td>${e.actions.map(a=>'• '+a).join('<br>')}</td><td>${e.responsible}</td></tr>`).join('');
+  document.querySelector('#severity-table tbody').innerHTML=sev.map(s=>`<tr><td>${badge('L'+s.level,s.level>=4?'red':s.level>=3?'gold':'blue')}</td><td>${s.name}</td><td>${s.description}</td><td>${s.response}</td><td style="font-style:italic;color:#64748b">${s.example}</td></tr>`).join('');
+
+  // Technical
+  document.querySelector('#arch-table tbody').innerHTML=arch.map(l=>`<tr><td><strong>${l.layer}</strong></td><td>${l.components.join(', ')}</td><td>${l.technology}</td><td style="font-size:0.82em">${l.governance}</td></tr>`).join('');
+  document.querySelector('#trust-table tbody').innerHTML=trust.layers.map(l=>`<tr><td><strong>${l.layer}</strong></td><td>${l.components.join(', ')}</td><td>${l.standard}</td></tr>`).join('');
+  document.querySelector('#kafka-table tbody').innerHTML=kafka.map(t=>`<tr><td><code style="color:#60a5fa">${t.name}</code></td><td>${t.partitions}</td><td>${t.retention}</td><td style="font-size:0.8em">${t.acl}</td></tr>`).join('');
+  document.querySelector('#tf-modules tbody').innerHTML=tf.map(m=>`<tr><td><strong>${m.name}</strong></td><td>${m.resources}</td><td>${m.description}</td></tr>`).join('');
+  document.querySelector('#tf-gates tbody').innerHTML=gates.map(g=>`<tr><td>${badge('G'+g.gate,'blue')} ${g.name}</td><td>${g.tool}</td><td>${g.blockOn}</td></tr>`).join('');
+  document.querySelector('#auditor-table tbody').innerHTML=aud.modes.map(m=>`<tr><td><strong>${m.mode}</strong></td><td>${m.description}</td><td>${m.sla}</td><td>${m.tools.join(', ')}</td></tr>`).join('');
+
+  // Financial Services
+  document.getElementById('fs-kpis').innerHTML=[[''+fs.totalModels,'Total Models','blue'],[''+fs.productionModels,'Production','green'],[''+fs.highRiskTier1,'High-Risk Tier-1','red'],[''+fs.inDevelopment,'In Development','gold']].map(([v,l,c])=>`<div class="kpi ${c}"><div class="value">${v}</div><div class="label">${l}</div></div>`).join('');
+  document.querySelector('#model-table tbody').innerHTML=fs.categories.map(c=>`<tr><td><strong>${c.name}</strong></td><td>${c.models}</td><td>${badge(c.tier,c.tier.includes('Tier-1')?'red':'gold')}</td><td>${c.srSection}</td><td>${c.avgAUROC?'AUROC: '+c.avgAUROC:c.precision?'Precision: '+c.precision:c.avgSharpe?'Sharpe: '+c.avgSharpe:c.alertQuality?'Alert Quality: '+c.alertQuality:c.pdAccuracy?'PD: '+c.pdAccuracy:c.accuracy?'Accuracy: '+c.accuracy:c.lossForecasting?'Forecast: '+c.lossForecasting:c.informationRatio?'IR: '+c.informationRatio:c.avgCSAT?'CSAT: '+c.avgCSAT:''}</td></tr>`).join('');
+  document.querySelector('#sr117-table tbody').innerHTML=sr117.map(s=>`<tr><td><strong>${s.stage}</strong></td><td>${s.activities.join(', ')}</td><td>${s.owner}</td><td>${s.timeline}</td><td>${s.artifacts.join(', ')}</td></tr>`).join('');
+  document.getElementById('fair-lending-card').innerHTML=`<h4>Fair Lending Compliance</h4><p>DI Threshold: <strong>${fl.disparateImpactThreshold}</strong> | Current: <strong style="color:#34d399">${fl.currentPerformance}</strong></p>${pct(fl.currentPerformance*100)}<p style="margin-top:8px">Protected Classes: ${fl.protectedClasses.map(c=>badge(c,'blue')).join(' ')}</p><p style="margin-top:8px">Adverse Action: ${fl.adverseActionExplainability.method} — Coverage: ${fl.adverseActionExplainability.coverage}</p>`;
+  document.getElementById('earl-card').innerHTML=`<h4>EARL Maturity</h4><p>Current: ${badge('Level '+earl.current+' — '+earl.currentName,'gold')} → Target: ${badge('Level '+earl.target+' — '+earl.targetName+' by '+earl.targetDate,'green')}</p>${pct(earl.current/5*100)}<table style="margin-top:12px">${earl.levels.map(l=>`<tr><td>${badge('L'+l.level,l.level<=earl.current?'green':'blue')}</td><td><strong>${l.name}</strong></td><td>${l.description}</td></tr>`).join('')}</table>`;
+
+  // AGI Safety
+  document.querySelector('#tbd-table tbody').innerHTML=tbd.map(p=>`<tr><td>${badge(p.id,'blue')}</td><td><strong>${p.name}</strong><br><span style="color:#94a3b8;font-size:0.85em">${p.description}</span></td><td>${p.implementation}</td><td>${badge(p.status,p.status==='Operational'?'green':'gold')}</td></tr>`).join('');
+  document.getElementById('align-kpis').innerHTML=[[''+align.testSuiteSize,'Total Tests','blue'],[''+align.overallPassRate,'Overall Pass Rate','green'],[''+align.categories.length,'Categories','purple']].map(([v,l,c])=>`<div class="kpi ${c}"><div class="value">${v}</div><div class="label">${l}</div></div>`).join('');
+  document.querySelector('#align-table tbody').innerHTML=align.categories.map(c=>{const s=parseFloat(c.currentScore);const t=parseFloat(c.passThreshold);return`<tr><td>${c.name}</td><td>${c.tests}</td><td>${c.passThreshold}</td><td>${c.currentScore} ${pct(s)}</td><td>${badge(s>=t?'PASS':'BELOW',s>=t?'green':'red')}</td></tr>`;}).join('');
+  document.querySelector('#contain-table tbody').innerHTML=contain.map(l=>`<tr><td><strong>${l.layer}</strong></td><td>${l.description}</td><td>${l.controls.join(', ')}</td><td>${badge(l.status,'green')}</td></tr>`).join('');
+  document.querySelector('#arl-table tbody').innerHTML=arl.map(l=>`<tr><td>${badge(l.level,'blue')}</td><td><strong>${l.name}</strong></td><td>${l.description}</td><td>${l.milestone}</td></tr>`).join('');
+
+  // Global Governance
+  document.querySelector('#icgc-table tbody').innerHTML=icgc.map(c=>`<tr><td>${badge(c.id,'blue')}</td><td><strong>${c.name}</strong></td><td>${c.function}</td><td>${badge(c.status,c.status.includes('Active')?'green':c.status.includes('Draft')?'gold':'blue')}</td><td>${c.timeline}</td></tr>`).join('');
+  document.querySelector('#gcr-table tbody').innerHTML=gcr.map(c=>`<tr><td><strong>${c.name}</strong></td><td>${c.count}</td><td>${c.threshold}</td><td>${c.requirement}</td></tr>`).join('');
+  document.querySelector('#xborder-table tbody').innerHTML=xb.map(m=>`<tr><td><strong>${m.name}</strong></td><td>${m.description}</td><td>${badge(m.status,m.status.includes('Active')?'green':'gold')}</td><td>${m.participants.join(', ')}</td></tr>`).join('');
+
+  // Blueprint
+  document.getElementById('scales-grid').innerHTML=bp.map(s=>`<div class="card"><h4 style="color:${s.scale==='Enterprise'?'#60a5fa':s.scale==='Frontier'?'#fbbf24':'#a78bfa'}">${s.scale} Scale</h4><p style="color:#94a3b8;font-size:0.85em">${s.description}</p><p style="margin-top:8px"><strong>Components:</strong></p><ul style="margin-left:16px;font-size:0.85em">${s.components.map(c=>'<li>'+c+'</li>').join('')}</ul><p style="margin-top:8px"><strong>Integration:</strong></p><ul style="margin-left:16px;font-size:0.82em;color:#64748b">${s.integrationPoints.map(i=>'<li>'+i+'</li>').join('')}</ul></div>`).join('');
+  document.querySelector('#scale-table tbody').innerHTML=Object.entries(scale).map(([k,v])=>`<tr><td><strong>${k.charAt(0).toUpperCase()+k.slice(1)}</strong></td><td>${v.scope}</td><td>${v.governance}</td><td>${v.investment}</td><td>${v.timeline}</td></tr>`).join('');
+  document.querySelector('#integration-table tbody').innerHTML=integ.existingFrameworks.map(f=>`<tr><td><strong>${f.framework}</strong></td><td>${f.integration}</td><td>${f.touchpoints.join(', ')}</td></tr>`).join('');
+
+  // Implementation
+  document.getElementById('impl-kpis').innerHTML=[['$68.4M','Total Investment','gold'],['$118.7M','NPV','green'],['42.1%','IRR','green'],['2.1 yr','Payback','blue'],['$52.3M','Annual Savings','green'],['48','Total Risks','red']].map(([v,l,c])=>`<div class="kpi ${c}"><div class="value">${v}</div><div class="label">${l}</div></div>`).join('');
+  document.getElementById('phases-grid').innerHTML=impl.map(p=>`<div class="card"><h4>${p.phase}</h4><p style="color:#94a3b8;font-size:0.85em">Duration: ${p.duration} | Investment: <strong style="color:#fbbf24">${p.investment}</strong></p><p style="margin-top:8px"><strong>Milestones:</strong></p><ul style="margin-left:16px;font-size:0.85em">${p.milestones.map(m=>'<li>'+m+'</li>').join('')}</ul></div>`).join('');
+  document.querySelector('#invest-table tbody').innerHTML=invest.map(i=>`<tr><td><strong>${i.category}</strong></td><td>${i.fiveYearCost}</td><td>${i.npv}</td><td>${i.irr}</td></tr>`).join('');
+  document.querySelector('#savings-table tbody').innerHTML=save.map(s=>`<tr><td><strong>${s.category}</strong></td><td style="color:#34d399">${s.annual}</td><td>${s.description}</td></tr>`).join('');
+  document.querySelector('#risk-table tbody').innerHTML=risks.map(r=>`<tr><td>${badge(r.id,'red')}</td><td><strong>${r.name}</strong></td><td>${(r.probability*100).toFixed(0)}%</td><td>${badge(r.impact,r.impact==='Critical'?'red':'gold')}</td><td style="font-size:0.85em">${r.mitigation}</td><td>${r.owner}</td></tr>`).join('');
+  document.getElementById('rollout-grid').innerHTML=Object.entries(rollout).map(([k,v])=>`<div class="card"><h4>${v.title}</h4><ul style="margin-left:16px;font-size:0.85em">${v.actions.map(a=>'<li>'+a+'</li>').join('')}</ul></div>`).join('');
+
+  // Appendices
+  document.querySelector('#tpl-table tbody').innerHTML=app.templates.map(t=>`<tr><td>${badge(t.id,'blue')}</td><td>${t.name}</td><td>${t.format}</td><td><code>${t.path}</code></td></tr>`).join('');
+  document.querySelector('#cl-table tbody').innerHTML=app.checklists.map(c=>`<tr><td>${badge(c.id,'blue')}</td><td>${c.name}</td><td>${c.items}</td><td>${c.covers.join(', ')}</td></tr>`).join('');
+  document.querySelector('#ref-table tbody').innerHTML=app.referenceMaterials.map(r=>`<tr><td>${badge(r.ref,'blue')}</td><td>${r.title}</td><td><code>${r.path}</code></td></tr>`).join('');
+}
+load();
+</script>
+</body>
+</html>
