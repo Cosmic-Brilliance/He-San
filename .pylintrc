@@ -1,0 +1,16 @@
+[MASTER]
+ignore=CVS
+ignore-patterns=
+
+[MESSAGES CONTROL]
+disable=
+    R, # Refactoring
+    C, # Convention
+    W, # Warnings
+    I, # Information
+    E1101, # no-member
+    E1136, # unsubscriptable-object
+    E0401  # import-error
+
+[REPORTS]
+output-format=text
