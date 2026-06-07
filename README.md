@@ -64,11 +64,20 @@ A comprehensive, modular AGI (Artificial General Intelligence) pipeline integrat
 
 ## Governance & Compliance
 
-This project enforces strict governance standards for AGI development.
+This project enforces strict governance standards for AGI development through the Omni-Sentinel framework.
 
-- **Governance Artifacts**: Located in `gstack_artifacts/`.
-- **Validation**: Run `make verify-governance` to ensure all artifacts meet compliance requirements.
-- **Monitoring**: `omni_sentinel_24h_monitor.py` tracks G-SRI and attestation status.
+- **Governance Artifacts**: Core artifacts like the control catalog ([`gstack_control_catalog.yaml`](gstack_control_catalog.yaml)) are located in `gstack_artifacts/`.
+- **Validation**:
+  - Run `make gstack-check` to validate artifacts against schemas.
+  - Comprehensive validation is provided by [`gstack_artifacts/validate_artifacts.py`](gstack_artifacts/validate_artifacts.py).
+- **Blueprints**: Strategic blueprints for 2026-2030 are available in the root directory (e.g., [`G_STACK_GOVERNANCE_BLUEPRINT_2026_2030.md`](G_STACK_GOVERNANCE_BLUEPRINT_2026_2030.md)).
+- **Monitoring**: [`omni_sentinel_24h_monitor.py`](omni_sentinel_24h_monitor.py) tracks real-time G-SRI and attestation status.
+
+### Omni-Sentinel CLI
+The framework includes a powerful CLI ([`omni_sentinel_cli.py`](omni_sentinel_cli.py)) for managing governance tasks, validating reports, and checking compliance status.
+
+### RAG Agentic Dashboard
+A specialized dashboard for exploring governance reports and blueprints is available in the [`rag-agentic-dashboard/`](rag-agentic-dashboard/) directory.
 
 ## Contributing
 
@@ -79,14 +88,14 @@ We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for 
 If you use this software in your research, please cite it as follows:
 
 ```bibtex
-@software{Tun_AGI-Pipeline_2024,
+@software{Tun_AGI-Pipeline_2026,
 author = {Tun, Kyaw T.},
 doi = {10.5281/zenodo.14504697},
-month = {12},
+month = {06},
 title = {{AGI-Pipeline}},
 url = {https://github.com/OneFineStarstuff/AGI-Pipeline},
-version = {1.0.0},
-year = {2024}
+version = {1.0.1},
+year = {2026}
 }
 ```
 
