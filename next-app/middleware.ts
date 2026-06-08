@@ -6,9 +6,10 @@ export function middleware(request: NextRequest) {
 
   // FIX: [CWE-1021] Strict Content Security Policy (CSP)
   // Ensures only trusted content can be loaded and executed
+  // Removed 'unsafe-eval' to meet production security standards
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-eval' 'unsafe-inline';
+    script-src 'self' 'unsafe-inline';
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data:;
     font-src 'self';

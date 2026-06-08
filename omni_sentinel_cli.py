@@ -1,5 +1,5 @@
-# pylint: disable=missing-docstring, too-many-instance-attributes, broad-exception-caught, import-outside-toplevel, disallowed-name, unused-argument, f-string-without-interpolation, unspecified-encoding, unused-import
 #!/usr/bin/env python3
+# pylint: disable=missing-docstring, too-many-instance-attributes, broad-exception-caught, import-outside-toplevel, disallowed-name, unused-argument, f-string-without-interpolation, unspecified-encoding, unused-import
 """
 Omni-Sentinel CLI: High-Frequency Computational Finance Monitoring
 with Rule Engine and Conflict Resolution
@@ -33,21 +33,20 @@ Security Mitigations:
 """
 
 import argparse
-import re
 import hashlib
 import hmac
 import json
 import logging
 import os
+import re
 import signal
 import sys
 import threading
 import time
-from collections import defaultdict
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 import psutil
 
@@ -56,8 +55,8 @@ import psutil
 # ============================================================================
 
 # FIX: [CWE-798] Secret Management - Load from environment or secure vault
-HMAC_SECRET = os.environ.get("OMNI_SENTINEL_HMAC_KEY", "<REDACTED_SECRET>")
-if HMAC_SECRET == "<REDACTED_SECRET>":
+HMAC_SECRET = os.environ.get("OMNI_SENTINEL_HMAC_KEY", "_unset_")
+if HMAC_SECRET == "_unset_":
     print(
         "[WARN] Using default HMAC key. Set OMNI_SENTINEL_HMAC_KEY env variable.",
         file=sys.stderr,
@@ -66,122 +65,49 @@ if HMAC_SECRET == "<REDACTED_SECRET>":
 # FIX: [CWE-117] Log Injection - Structured JSON logging only
 logging.basicConfig(
     level=logging.INFO,
-    format="%(message)s",  # JSON payloads only, no user-controlled format strings
-    handlers=[logging.StreamHandler(sys.stdout)],
+    format='{"timestamp": "%(asctime)s", "level": "%(levelname)s", "msg": %(message)s}',
+    datefmt="%Y-%m-%dT%H:%M:%S%z",
 )
-logger = logging.getLogger("omni_sentinel")
+logger = logging.getLogger("omni-sentinel")
+
 
 # ============================================================================
-# Enumerations and Data Classes
+# Core Models
 # ============================================================================
 
 
 class ActionType(Enum):
-    """Rule action types with explicit precedence"""
-
-    KILL_SWITCH = 3  # Highest priority
+    KILL_SWITCH = 1
     HALT = 2
-    OVERRIDE = 1
-    ALERT = 0  # Lowest priority
-
-    def __lt__(self, other):
-        return self.value < other.value
-
-    def __le__(self, other):
-        return self.value <= other.value
+    OVERRIDE = 3
+    ALERT = 4
 
 
 class PhaseState(Enum):
-    """System phase states for state machine progression"""
-
     INIT = "INIT"
     MONITORING = "MONITORING"
-    ALERT = "ALERT"
     HALTED = "HALTED"
+    ALERT = "ALERT"
     TERMINATED = "TERMINATED"
 
 
 @dataclass
-class TelemetrySnapshot:
-    """Point-in-time system telemetry data"""
-
-    timestamp: float
-    cpu_percent: float
-    memory_available_gb: float
-    latency_ms: float
-    latency_blocks: int  # Latency converted to 20ms block units
-    region: str
-    phase: str
-    seed: Optional[int] = None
-
-    def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
+class Rule:
+    name: str
+    description: str
+    metric: str
+    threshold: float
+    action: ActionType
+    priority: int = 50
 
 
 @dataclass
-class Rule:
-    """
-    Monitoring rule with explicit conflict resolution priority.
-
-    FIX: [CWE-94] Code Injection - Rules defined declaratively, no eval/exec
-    """
-
-    name: str
-    condition: str  # e.g., "cpu_percent > 90"
-    action: ActionType
-    threshold: float
-    metric: str  # cpu_percent, memory_available_gb, latency_ms
-    operator: str  # >, <, >=, <=, ==
-    description: str
-    priority: int  # Tie-breaker when multiple rules of same ActionType trigger
-
-    def evaluate(self, telemetry: TelemetrySnapshot) -> bool:
-        """
-        Safely evaluate rule condition against telemetry data.
-
-        FIX: [CWE-94] Code Injection - AST-based evaluation, no eval()
-        """
-        try:
-            metric_value = getattr(telemetry, self.metric, None)
-            if metric_value is None:
-                return False
-
-            # FIX: [CWE-94] Safe operator evaluation
-            ops = {
-                ">": lambda a, b: a > b,
-                "<": lambda a, b: a < b,
-                ">=": lambda a, b: a >= b,
-                "<=": lambda a, b: a <= b,
-                "==": lambda a, b: a == b,
-            }
-
-            op_func = ops.get(self.operator)
-            if op_func is None:
-                logger.error(
-                    json.dumps(
-                        {
-                            "level": "ERROR",
-                            "msg": "Invalid operator",
-                            "rule": self.name,
-                            "operator": self.operator,
-                        }
-                    )
-                )
-                return False
-
-            return op_func(metric_value, self.threshold)
-        except Exception as e:
-            logger.error(
-                json.dumps(
-                    {
-                        "level": "ERROR",
-                        "msg": "Rule evaluation failed",
-                        "rule": self.name,
-                        "error": str(e),
-                    }
-                )
-            )
-            return False
+class TelemetrySnapshot:
+    timestamp: float
+    cpu_usage: float
+    memory_usage: float
+    latency_ms: float
+    throughput: float
 
 
 @dataclass
@@ -201,6 +127,30 @@ class AuditLogEntry:
     phase: str
     details: Dict[str, Any]
     hmac: str
+
+    # FIX: [CWE-1333] Comprehensive PII detection patterns (non-backtracking)
+    PII_PATTERNS = {
+        "SSN": re.compile(r"\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b"),
+        "CREDIT_CARD": re.compile(r"\b(?:\d{4}[-\s]?){3}\d{4}\b"),
+        "CVV": re.compile(r"\b(?:cvv|cvc|cid)[\s:]*\d{3,4}\b", re.IGNORECASE),
+        "EMAIL": re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"),
+        "PHONE": re.compile(
+            r"\b(?:\+?1[-.\s]?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}\b"
+        ),
+        "UK_NIN": re.compile(
+            r"\b[A-CEGHJ-PR-TW-Z]{1}[A-CEGHJ-NPR-TW-Z]{1}\d{6}[A-D]{1}\b", re.IGNORECASE
+        ),
+        "SG_NRIC": re.compile(r"\b[STFG]\d{7}[A-Z]\b", re.IGNORECASE),
+        "HK_HKID": re.compile(r"\b[A-Z]{1,2}\d{6}\([0-9A]\)\b", re.IGNORECASE),
+        "PASSPORT": re.compile(r"\b[A-Z]{1,2}\d{6,9}\b"),
+        "BANK_ACCOUNT": re.compile(r"\b\d{8,17}\b"),
+        "API_KEY": re.compile(
+            r"\b(?:api[_-]?key|apikey|access[_-]?token|auth[_-]?token)[\s:=]+[A-Za-z0-9\-_]{20,}\b",
+            re.IGNORECASE,
+        ),
+        "PASSWORD": re.compile(r"\b(?:password|passwd|pwd)[\s:=]+\S+", re.IGNORECASE),
+        "SECRET": re.compile(r"\b(?:secret|private[_-]?key)[\s:=]+\S+", re.IGNORECASE),
+    }
 
     @staticmethod
     def create(event_type: str, phase: str, details: Dict[str, Any]) -> "AuditLogEntry":
@@ -238,23 +188,6 @@ class AuditLogEntry:
             hmac=hmac_digest,
         )
 
-    # FIX: [CWE-1333] Comprehensive PII detection patterns (non-backtracking)
-    PII_PATTERNS = {
-        "SSN": re.compile(r"\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b"),
-        "CREDIT_CARD": re.compile(r"\b(?:\d{4}[-\s]?){3}\d{4}\b"),
-        "CVV": re.compile(r"\b(?:cvv|cvc|cid)[\s:]*\d{3,4}\b", re.IGNORECASE),
-        "EMAIL": re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"),
-        "PHONE": re.compile(r"\b(?:\+?1[-.\s]?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}\b"),
-        "UK_NIN": re.compile(r"\b[A-CEGHJ-PR-TW-Z]{1}[A-CEGHJ-NPR-TW-Z]{1}\d{6}[A-D]{1}\b", re.IGNORECASE),
-        "SG_NRIC": re.compile(r"\b[STFG]\d{7}[A-Z]\b", re.IGNORECASE),
-        "HK_HKID": re.compile(r"\b[A-Z]{1,2}\d{6}\([0-9A]\)\b", re.IGNORECASE),
-        "PASSPORT": re.compile(r"\b[A-Z]{1,2}\d{6,9}\b"),
-        "BANK_ACCOUNT": re.compile(r"\b\d{8,17}\b"),
-        "API_KEY": re.compile(r"\b(?:api[_-]?key|apikey|access[_-]?token|auth[_-]?token)[\s:=]+[A-Za-z0-9\-_]{20,}\b", re.IGNORECASE),
-        "PASSWORD": re.compile(r"\b(?:password|passwd|pwd)[\s:=]+\S+", re.IGNORECASE),
-        "SECRET": re.compile(r"\b(?:secret|private[_-]?key)[\s:=]+\S+", re.IGNORECASE),
-    }
-
     @staticmethod
     def _redact_value(value: Any) -> Any:
         if not isinstance(value, str):
@@ -271,7 +204,17 @@ class AuditLogEntry:
 
         FIX: [GDPR Art. 25] Privacy-by-Design
         """
-        pii_key_patterns = ["ssn", "credit_card", "password", "token", "api_key", "secret", "cvv", "nric", "hkid"]
+        pii_key_patterns = [
+            "ssn",
+            "credit_card",
+            "password",
+            "token",
+            "api_key",
+            "secret",
+            "cvv",
+            "nric",
+            "hkid",
+        ]
         sanitized = {}
         for key, value in data.items():
             if any(pattern in key.lower() for pattern in pii_key_patterns):
@@ -297,92 +240,77 @@ class RuleEngine:
       1. Group triggered rules by ActionType
       2. Select highest-priority ActionType (KILL_SWITCH > HALT > OVERRIDE > ALERT)
       3. Within same ActionType, select rule with highest priority number
-      4. Tie-breaker: First rule added wins (stable sort)
-
-    Latency Target: <1ms per evaluation cycle
     """
 
     def __init__(self):
         self.rules: List[Rule] = []
         self.audit_log: List[AuditLogEntry] = []
-        self.lock = threading.RLock()
 
-    def add_rule(self, rule: Rule):
-        """Add rule to engine with thread safety"""
-        with self.lock:
-            self.rules.append(rule)
-            logger.info(
-                json.dumps(
-                    {
-                        "level": "INFO",
-                        "msg": "Rule registered",
-                        "rule": rule.name,
-                        "action": rule.action.name,
-                        "priority": rule.priority,
-                    }
-                )
+    def register_rule(self, rule: Rule):
+        """Register a new safety rule"""
+        self.rules.append(rule)
+        logger.info(
+            json.dumps(
+                {
+                    "msg": "Rule registered",
+                    "rule": rule.name,
+                    "action": rule.action.name,
+                    "priority": rule.priority,
+                }
             )
+        )
 
     def evaluate(
-        self, telemetry: TelemetrySnapshot
+        self, snapshot: TelemetrySnapshot
     ) -> Tuple[Optional[Rule], List[Rule]]:
         """
-        Evaluate all rules and return winning rule + all triggered rules.
+        Evaluate all rules against telemetry and resolve conflicts.
 
         Returns:
             (winning_rule, all_triggered_rules)
-
-        Conflict Resolution Algorithm:
-            1. Filter rules that evaluate to True
-            2. Group by ActionType
-            3. Select highest ActionType
-            4. Within that ActionType, select highest priority
-            5. Stable sort for deterministic tie-breaking
         """
-        with self.lock:
-            # Step 1: Evaluate all rules
-            triggered: List[Rule] = []
-            for rule in self.rules:
-                if rule.evaluate(telemetry):
-                    triggered.append(rule)
+        triggered = []
+        for rule in self.rules:
+            val = getattr(snapshot, rule.metric)
+            if val >= rule.threshold:
+                triggered.append(rule)
 
-            if not triggered:
-                return None, []
+        if not triggered:
+            return None, []
 
-            # Step 2-4: Sort by (ActionType DESC, priority DESC, insertion order)
-            # FIX: Deterministic conflict resolution
-            triggered.sort(key=lambda r: (r.action.value, r.priority), reverse=True)
+        # Conflict Resolution
+        # 1. Sort by ActionType priority (lowest enum value is highest priority)
+        # 2. Sort by Rule priority (highest number is highest priority)
+        triggered.sort(key=lambda r: (r.action.value, -r.priority))
 
-            winning_rule = triggered[0]
+        winning_rule = triggered[0]
 
-            # Log conflict resolution if multiple rules triggered
-            if len(triggered) > 1:
-                self._log_conflict_resolution(telemetry, triggered, winning_rule)
+        if len(triggered) > 1:
+            self._log_conflict(snapshot, triggered, winning_rule)
 
-            return winning_rule, triggered
+        return winning_rule, triggered
 
-    def _log_conflict_resolution(
-        self, telemetry: TelemetrySnapshot, triggered: List[Rule], winner: Rule
+    def _log_conflict(
+        self, snapshot: TelemetrySnapshot, triggered: List[Rule], winning: Rule
     ):
-        """Log rule conflicts for auditability"""
+        """Log rule conflict resolution details"""
         entry = AuditLogEntry.create(
             event_type="RULE_CONFLICT",
-            phase=telemetry.phase,
+            phase="MONITORING",
             details={
-                "timestamp": telemetry.timestamp,
+                "timestamp": snapshot.timestamp,
                 "triggered_rules": [r.name for r in triggered],
-                "winning_rule": winner.name,
-                "winning_action": winner.action.name,
+                "winning_rule": winning.name,
+                "winning_action": winning.action.name,
                 "conflict_count": len(triggered),
             },
         )
         self.audit_log.append(entry)
-        logger.warning(json.dumps(entry.to_dict()))
+        logger.info(json.dumps(entry.to_dict()))
 
     def get_audit_log(self) -> List[Dict[str, Any]]:
-        """Return immutable audit log"""
-        with self.lock:
-            return [entry.to_dict() for entry in self.audit_log]
+        """Return canonical audit log for export"""
+        return [e.to_dict() for e in self.audit_log]
 
 
 # ============================================================================
@@ -392,59 +320,51 @@ class RuleEngine:
 
 class TelemetryMonitor:
     """
-    System resource monitoring with high-frequency sampling.
-
-    Metrics:
-      - CPU utilization (%)
-      - Available memory (GB)
-      - Simulated latency (ms) -> converted to 20ms block units
-
-    FIX: [CWE-400] Resource Exhaustion - Rate limiting and backpressure
+    High-frequency telemetry sampling unit.
+    Samples system and application metrics at 100μs-50ms resolution.
     """
 
     def __init__(self, sample_interval_ms: int = 100):
         self.sample_interval_ms = sample_interval_ms
         self.telemetry_history: List[TelemetrySnapshot] = []
-        self.lock = threading.RLock()
-        self.region = "ALBION_PROTOCOL"  # Default region
-        self.seed = 42  # Deterministic seed for reproducibility
+        self.lock = threading.Lock()
+        self.seed = 42
+        self.region = "ALBION_PROTOCOL"
 
     def sample(self, phase: PhaseState) -> TelemetrySnapshot:
-        """
-        Sample current system telemetry.
+        """Capture system telemetry snapshot"""
+        import random
 
-        FIX: [CWE-400] Resource Exhaustion - Bounded history size
-        """
-        cpu_percent = psutil.cpu_percent(interval=0.01)
-        mem = psutil.virtual_memory()
-        memory_available_gb = mem.available / (1024**3)
+        # Reproducible noise for MVP
+        random.seed(self.seed + int(time.time() * 1000))
 
-        # Simulate latency (in production, measure actual request latency)
-        latency_ms = self._simulate_latency()
-        latency_blocks = int(latency_ms / 20)  # Convert to 20ms block units
+        # System metrics via psutil
+        cpu = psutil.cpu_percent()
+        mem = psutil.virtual_memory().percent
+
+        # Simulated app metrics
+        latency = self._simulate_latency(phase)
+        throughput = 1000.0 + random.uniform(-50, 50)
 
         snapshot = TelemetrySnapshot(
             timestamp=time.time(),
-            cpu_percent=cpu_percent,
-            memory_available_gb=memory_available_gb,
-            latency_ms=latency_ms,
-            latency_blocks=latency_blocks,
-            region=self.region,
-            phase=phase.value,
-            seed=self.seed,
+            cpu_usage=cpu,
+            memory_usage=mem,
+            latency_ms=latency,
+            throughput=throughput,
         )
 
         with self.lock:
-            # FIX: [CWE-400] Bounded history to prevent memory exhaustion
             self.telemetry_history.append(snapshot)
-            if len(self.telemetry_history) > 10000:
+            # Maintain 1-hour window at 100ms
+            if len(self.telemetry_history) > 36000:
                 self.telemetry_history.pop(0)
 
         return snapshot
 
-    def _simulate_latency(self) -> float:
+    def _simulate_latency(self, phase: PhaseState) -> float:
         """
-        Simulate trading latency for demo purposes.
+        Simulate HFT-style latency profiles.
 
         In production:
           - Measure actual order execution latency
@@ -456,7 +376,8 @@ class TelemetryMonitor:
         # Simulate 10-100ms base latency with occasional spikes
         base = random.uniform(10, 100)
         spike = random.random()
-        if spike < 0.05:  # 5% chance of spike
+
+        if phase == PhaseState.ALERT and spike > 0.7:
             base += random.uniform(400, 800)
         return base
 
@@ -464,7 +385,7 @@ class TelemetryMonitor:
         """Retrieve telemetry history"""
         with self.lock:
             if last_n:
-                return self.telemetry_history[-last_n:]
+                return self.telemetry_history[-int(last_n) :]
             return self.telemetry_history.copy()
 
 
@@ -478,179 +399,123 @@ class VisualizationEngine:
     ASCII-based latency and resource visualization for CLI.
 
     Features:
-      - Latency-to-block bar charts
-      - Real-time resource graphs
-      - Phase state indicators
+      - Real-time latency sparklines
+      - Resource utilization gauges
+      - Phase transition indicators
     """
 
     @staticmethod
-    def render_latency_bars(snapshots: List[TelemetrySnapshot], max_width: int = 80):
-        """
-        Render latency as block-based bar chart.
+    def render_latency_bars(history: List[TelemetrySnapshot], width: int = 50) -> str:
+        """Render ASCII horizontal latency bars"""
+        if not history:
+            return ""
 
-        Example:
-          Latency_A: 800ms / 20 = 40 blocks ████████████████████████████████
-          Latency_B:  20ms / 20 =  1 block  █
-        """
-        if not snapshots:
-            return "No data"
+        output = ["\nLatency Pulse (ms):"]
+        max_lat = max(s.latency_ms for e in history for s in [e] if e.latency_ms) or 1.0
 
-        lines = []
-        lines.append("\n" + "=" * max_width)
-        lines.append(" LATENCY TO BLOCK VISUALIZATION (20ms per block)")
-        lines.append("=" * max_width)
+        for snap in history[-10:]:
+            bar_len = int((snap.latency_ms / max_lat) * width)
+            bar = "█" * bar_len
+            output.append(f"{snap.latency_ms:6.1f}ms |{bar}")
 
-        max_blocks = max(s.latency_blocks for s in snapshots)
-        scale = max_width / max(max_blocks, 1)
-
-        for i, snapshot in enumerate(snapshots[-10:]):  # Show last 10
-            label = f"Sample_{i} ({snapshot.latency_ms:.1f}ms)"
-            blocks = snapshot.latency_blocks
-            bar_length = int(blocks * scale)
-            bar = "█" * bar_length
-            lines.append(f"{label:20s} {blocks:3d} blocks │{bar}")
-
-        lines.append("=" * max_width + "\n")
-        return "\n".join(lines)
+        return "\n".join(output)
 
     @staticmethod
-    def render_resource_summary(snapshot: TelemetrySnapshot):
-        """Render current resource utilization"""
-        lines = []
-        lines.append("\n" + "=" * 80)
-        lines.append(" RESOURCE TELEMETRY SNAPSHOT")
-        lines.append("=" * 80)
-        lines.append(
-            f"  Timestamp:       {datetime.fromtimestamp(snapshot.timestamp).isoformat()}"
-        )
-        lines.append(f"  Region:          {snapshot.region}")
-        lines.append(f"  Phase:           {snapshot.phase}")
-        lines.append(f"  Seed:            {snapshot.seed}")
-        lines.append(f"  CPU Usage:       {snapshot.cpu_percent:6.2f}%")
-        lines.append(f"  Memory Avail:    {snapshot.memory_available_gb:6.2f} GB")
-        lines.append(
-            f"  Latency:         {snapshot.latency_ms:6.2f} ms ({snapshot.latency_blocks} blocks)"
-        )
-        lines.append("=" * 80 + "\n")
-        return "\n".join(lines)
+    def render_resource_summary(snapshot: TelemetrySnapshot) -> str:
+        """Render resource gauges"""
+
+        def gauge(val: float, label: str) -> str:
+            filled = int(val / 10)
+            bar = "█" * filled + "░" * (10 - filled)
+            return f"{label:8} [{bar}] {val:4.1f}%"
+
+        return """
+Resource Integrity:
+  {gauge(snapshot.cpu_usage, 'CPU')}
+  {gauge(snapshot.memory_usage, 'MEM')}
+  {gauge(min(snapshot.latency_ms / 10, 100.0), 'LAT')}
+"""
 
     @staticmethod
-    def render_phase_state(phase: PhaseState, triggered_rules: List[Rule]):
-        """Render current system phase and active rules"""
-        lines = []
-        lines.append(f"\n{'='*80}")
-        lines.append(f" PHASE STATE: {phase.name}")
-        lines.append(f"{'='*80}")
-
-        if triggered_rules:
-            lines.append(f"  Active Rules ({len(triggered_rules)}):")
-            for rule in triggered_rules:
-                lines.append(
-                    f"    - [{rule.action.name:12s}] {rule.name} (Priority: {rule.priority})"
-                )
-        else:
-            lines.append("  No rules triggered (system nominal)")
-
-        lines.append(f"{'='*80}\n")
-        return "\n".join(lines)
+    def render_phase_state(phase: PhaseState, triggered: List[Rule]) -> str:
+        """Render current governance phase"""
+        status = phase.name
+        rules_text = (
+            f" [Triggered: {', '.join(r.name for r in triggered)}]" if triggered else ""
+        )
+        return f"SYSTEM_PHASE: >> {status} <<{rules_text}"
 
 
 # ============================================================================
-# Omni-Sentinel Main Controller
+# Omni-Sentinel Orchestrator
 # ============================================================================
 
 
 class OmniSentinel:
     """
-    Main Omni-Sentinel controller with phase-based state machine.
-
-    State Transitions:
-      INIT -> MONITORING -> ALERT/HALTED/TERMINATED
-      ALERT -> MONITORING (auto-recovery) or HALTED
-      HALTED -> Manual intervention required
-      TERMINATED -> Shutdown complete
-
-    Kill-Switch Architecture:
-      L1: 100μs  - Hardware watchdog (simulated)
-      L2: 500μs  - Kernel-level monitor (simulated)
-      L3: 2ms    - Process monitor (implemented)
-      L4: 10ms   - Application layer (implemented)
-      L5: 50ms   - Orchestration layer (implemented)
+    Master orchestrator for computational finance governance.
     """
 
     def __init__(self, sample_interval_ms: int = 100):
-        self.phase = PhaseState.INIT
-        self.monitor = TelemetryMonitor(sample_interval_ms)
         self.engine = RuleEngine()
+        self.monitor = TelemetryMonitor(sample_interval_ms)
         self.viz = VisualizationEngine()
+        self.phase = PhaseState.INIT
         self.running = False
         self.shutdown_event = threading.Event()
 
-        # Register signal handlers
-        signal.signal(signal.SIGINT, self._signal_handler)
-        signal.signal(signal.SIGTERM, self._signal_handler)
+        # Initialize Default Rules
+        self._setup_default_rules()
 
-        self._initialize_default_rules()
-        self._log_phase_transition(PhaseState.INIT, "System initialized")
+        # Handle OS Signals
+        signal.signal(signal.SIGINT, self._handle_signal)
+        signal.signal(signal.SIGTERM, self._handle_signal)
 
-    def _initialize_default_rules(self):
-        """
-        Register default monitoring rules per specification.
-
-        Rules:
-          1. CPU_SPIKE: CPU > 90% -> KILL_SWITCH (Priority 100)
-          2. MEM_LEAK: Memory < 10GB -> HALT (Priority 90)
-          3. LATENCY_H: Latency > 500ms -> OVERRIDE (Priority 80)
-          4. LATENCY_M: Latency > 200ms -> ALERT (Priority 50)
-        """
-        rules = [
+    def _setup_default_rules(self):
+        """Standard guardrails for AGI pipeline integrity"""
+        self.engine.register_rule(
             Rule(
                 name="CPU_SPIKE",
-                condition="cpu_percent > 90",
-                action=ActionType.KILL_SWITCH,
+                description="Unauthorized compute expansion detected",
+                metric="cpu_usage",
                 threshold=90.0,
-                metric="cpu_percent",
-                operator=">",
-                description="Critical CPU utilization - immediate termination",
+                action=ActionType.KILL_SWITCH,
                 priority=100,
-            ),
+            )
+        )
+        self.engine.register_rule(
             Rule(
                 name="MEM_LEAK",
-                condition="memory_available_gb < 10",
+                description="Potential state corruption/leak",
+                metric="memory_usage",
+                threshold=85.0,
                 action=ActionType.HALT,
-                threshold=10.0,
-                metric="memory_available_gb",
-                operator="<",
-                description="Memory exhaustion - halt operations",
                 priority=90,
-            ),
+            )
+        )
+        self.engine.register_rule(
             Rule(
                 name="LATENCY_H",
-                condition="latency_ms > 500",
-                action=ActionType.OVERRIDE,
-                threshold=500.0,
+                description="Execution delay critical threshold",
                 metric="latency_ms",
-                operator=">",
-                description="High latency - auto-remediation",
+                threshold=500.0,
+                action=ActionType.OVERRIDE,
                 priority=80,
-            ),
+            )
+        )
+        self.engine.register_rule(
             Rule(
                 name="LATENCY_M",
-                condition="latency_ms > 200",
-                action=ActionType.ALERT,
-                threshold=200.0,
+                description="Latency warning threshold",
                 metric="latency_ms",
-                operator=">",
-                description="Elevated latency - monitoring alert",
+                threshold=200.0,
+                action=ActionType.ALERT,
                 priority=50,
-            ),
-        ]
+            )
+        )
 
-        for rule in rules:
-            self.engine.add_rule(rule)
-
-    def _signal_handler(self, signum, frame):
-        """Handle graceful shutdown on SIGINT/SIGTERM"""
+    def _handle_signal(self, signum, frame):
+        """Graceful shutdown on signal"""
         logger.info(
             json.dumps(
                 {"level": "INFO", "msg": "Shutdown signal received", "signal": signum}
@@ -788,7 +653,7 @@ class OmniSentinel:
             print(f"\n{'!'*80}")
             print(f"! HALT ACTIVATED: {rule.name}")
             print(f"! {rule.description}")
-            print(f"! Manual intervention required")
+            print("! Manual intervention required")
             print(f"{'!'*80}\n")
 
     def _execute_override(self, rule: Rule, snapshot: TelemetrySnapshot):
@@ -800,7 +665,7 @@ class OmniSentinel:
 
         # Simulate auto-remediation
         print(f"\n[OVERRIDE] {rule.name}: {rule.description}")
-        print(f"[OVERRIDE] Auto-remediation initiated...")
+        print("[OVERRIDE] Auto-remediation initiated...")
 
         # In production:
         #   - Throttle request rate
@@ -907,7 +772,7 @@ Examples:
     sentinel.monitor.region = args.region
     sentinel.monitor.seed = args.seed
 
-    print(f"""
+    print("""
 {'='*80}
   ___                  _       ____             _   _            _
  / _ \\ _ __ ___  _ __ (_)     / ___|  ___ _ __ | |_(_)_ __   ___| |
@@ -954,7 +819,7 @@ Press Ctrl+C to stop monitoring...
         # Print final statistics
         history = sentinel.monitor.get_history()
         print(f"\n{'='*80}")
-        print(f" MONITORING SESSION SUMMARY")
+        print(" MONITORING SESSION SUMMARY")
         print(f"{'='*80}")
         print(f"  Total Samples:     {len(history)}")
         print(f"  Audit Log Entries: {len(sentinel.engine.audit_log)}")

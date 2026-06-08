@@ -21,7 +21,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app/
 
 # Ensure the non-root user owns the /app directory
-RUN chown -r agiuser:agiuser /app
+RUN chown -R agiuser:agiuser /app
 
 # Switch to the non-root user
 USER agiuser
