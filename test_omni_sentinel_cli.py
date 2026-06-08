@@ -1,7 +1,12 @@
 import unittest
-import os
-import time
-from omni_sentinel_cli import OmniSentinel, PhaseState, ActionType, Rule, TelemetrySnapshot, AuditLogEntry
+
+from omni_sentinel_cli import (
+    AuditLogEntry,
+    OmniSentinel,
+    PhaseState,
+    TelemetrySnapshot,
+)
+
 
 class TestOmniSentinel(unittest.TestCase):
     def setUp(self):
@@ -23,6 +28,7 @@ class TestOmniSentinel(unittest.TestCase):
         sanitized = AuditLogEntry._sanitize_pii(data)
         self.assertEqual(sanitized["msg"], "My SSN is <REDACTED_SSN>")
         self.assertEqual(sanitized["api_key"], "<REDACTED_PII>")
+
 
 if __name__ == "__main__":
     unittest.main()

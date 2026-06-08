@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-# pylint: disable=missing-docstring, too-many-instance-attributes, broad-exception-caught
-# pylint: disable=import-outside-toplevel, disallowed-name, unused-argument
-# pylint: disable=f-string-without-interpolation, unspecified-encoding, unused-import
+# pylint: disable=missing-docstring, too-many-instance-attributes, broad-exception-caught  # noqa: E501
+# pylint: disable=import-outside-toplevel, disallowed-name, unused-argument  # noqa: E501
+# pylint: disable=f-string-without-interpolation, unspecified-encoding, unused-import  # noqa: E501
 """
 Omni-Sentinel CLI: High-Frequency Computational Finance Monitoring
 with Rule Engine and Conflict Resolution
@@ -14,7 +14,7 @@ Date: 2026-01-25
 Governance Axioms:
   - Temporal Sovereignty: Real-time state progression with phase-break logging
   - Immutable Auditability: Cryptographic log integrity (HMAC-SHA256)
-  - Algorithmic Accountability: Deterministic rule precedence with conflict resolution
+  - Algorithmic Accountability: Deterministic rule precedence with conflict resolution  # noqa: E501
 
 Trust Primitives:
   - Cryptographic Veracity: HMAC-SHA256 for log entries
@@ -41,6 +41,7 @@ import json
 import logging
 import os
 import re
+import secrets
 import signal
 import sys
 import threading
@@ -50,26 +51,25 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
-import psutil
+import psutil  # type: ignore[import-untyped]
 
 # ============================================================================
 # Security Configuration
 # ============================================================================
 
 # FIX: [CWE-798] Secret Management - Load from environment or secure vault
-import secrets
-HMAC_SECRET = os.environ.get("OMNI_SENTINEL_HMAC_KEY")
+HMAC_SECRET: str = os.environ.get("OMNI_SENTINEL_HMAC_KEY", "")
 if not HMAC_SECRET:
     HMAC_SECRET = secrets.token_hex(32)
     print(
-        "[INFO] OMNI_SENTINEL_HMAC_KEY not set. Using generated ephemeral key.",
+        "[INFO] OMNI_SENTINEL_HMAC_KEY not set. Using generated ephemeral key.",  # noqa: E501
         file=sys.stderr,
     )
 
 # FIX: [CWE-117] Log Injection - Structured JSON logging only
 logging.basicConfig(
     level=logging.INFO,
-    format='{"timestamp": "%(asctime)s", "level": "%(levelname)s", "msg": %(message)s}',
+    format='{"timestamp": "%(asctime)s", "level": "%(levelname)s", "msg": %(message)s}',  # noqa: E501
     datefmt="%Y-%m-%dT%H:%M:%S%z",
 )
 logger = logging.getLogger("omni-sentinel")
@@ -137,27 +137,36 @@ class AuditLogEntry:
         "SSN": re.compile(r"\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b"),
         "CREDIT_CARD": re.compile(r"\b(?:\d{4}[-\s]?){3}\d{4}\b"),
         "CVV": re.compile(r"\b(?:cvv|cvc|cid)[\s:]*\d{3,4}\b", re.IGNORECASE),
-        "EMAIL": re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"),
+        "EMAIL": re.compile(
+            r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
+        ),
         "PHONE": re.compile(
             r"\b(?:\+?1[-.\s]?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}\b"
         ),
         "UK_NIN": re.compile(
-            r"\b[A-CEGHJ-PR-TW-Z]{1}[A-CEGHJ-NPR-TW-Z]{1}\d{6}[A-D]{1}\b", re.IGNORECASE
+            r"\b[A-CEGHJ-PR-TW-Z]{1}[A-CEGHJ-NPR-TW-Z]{1}\d{6}[A-D]{1}\b",
+            re.IGNORECASE,
         ),
         "SG_NRIC": re.compile(r"\b[STFG]\d{7}[A-Z]\b", re.IGNORECASE),
         "HK_HKID": re.compile(r"\b[A-Z]{1,2}\d{6}\([0-9A]\)\b", re.IGNORECASE),
         "PASSPORT": re.compile(r"\b[A-Z]{1,2}\d{6,9}\b"),
         "BANK_ACCOUNT": re.compile(r"\b\d{8,17}\b"),
         "API_KEY": re.compile(
-            r"\b(?:api[_-]?key|apikey|access[_-]?token|auth[_-]?token)[\s:=]+[A-Za-z0-9\-_]{20,}\b",
+            r"\b(?:api[_-]?key|apikey|access[_-]?token|auth[_-]?token)[\s:=]+[A-Za-z0-9\-_]{20,}\b",  # noqa: E501
             re.IGNORECASE,
         ),
-        "PASSWORD": re.compile(r"\b(?:password|passwd|pwd)[\s:=]+\S+", re.IGNORECASE),
-        "SECRET": re.compile(r"\b(?:secret|private[_-]?key)[\s:=]+\S+", re.IGNORECASE),
+        "PASSWORD": re.compile(
+            r"\b(?:password|passwd|pwd)[\s:=]+\S+", re.IGNORECASE
+        ),
+        "SECRET": re.compile(
+            r"\b(?:secret|private[_-]?key)[\s:=]+\S+", re.IGNORECASE
+        ),
     }
 
     @staticmethod
-    def create(event_type: str, phase: str, details: Dict[str, Any]) -> "AuditLogEntry":
+    def create(
+        event_type: str, phase: str, details: Dict[str, Any]
+    ) -> "AuditLogEntry":
         """
         Create audit log entry with HMAC-SHA256 integrity protection.
 
@@ -181,7 +190,9 @@ class AuditLogEntry:
 
         # FIX: [CWE-327] Use HMAC-SHA256 with secret key
         hmac_digest = hmac.new(
-            HMAC_SECRET.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256
+            (HMAC_SECRET or "").encode("utf-8"),
+            payload.encode("utf-8"),
+            hashlib.sha256,
         ).hexdigest()
 
         return AuditLogEntry(
@@ -238,11 +249,11 @@ class AuditLogEntry:
 
 class RuleEngine:
     """
-    High-frequency rule evaluation engine with deterministic conflict resolution.
+    High-frequency rule evaluation engine with deterministic conflict resolution.  # noqa: E501
 
     Conflict Resolution Policy:
       1. Group triggered rules by ActionType
-      2. Select highest-priority ActionType (KILL_SWITCH > HALT > OVERRIDE > ALERT)
+      2. Select highest-priority ActionType (KILL_SWITCH > HALT > OVERRIDE > ALERT)  # noqa: E501
       3. Within same ActionType, select rule with highest priority number
     """
 
@@ -283,7 +294,7 @@ class RuleEngine:
             return None, []
 
         # Conflict Resolution
-        # 1. Sort by ActionType priority (lowest enum value is highest priority)
+        # 1. Sort by ActionType priority (lowest enum value is highest priority)  # noqa: E501
         # 2. Sort by Rule priority (highest number is highest priority)
         triggered.sort(key=lambda r: (r.action.value, -r.priority))
 
@@ -385,11 +396,13 @@ class TelemetryMonitor:
             base += random.uniform(400, 800)
         return base
 
-    def get_history(self, last_n: Optional[int] = None) -> List[TelemetrySnapshot]:
+    def get_history(
+        self, last_n: Optional[int] = None
+    ) -> List[TelemetrySnapshot]:
         """Retrieve telemetry history"""
         with self.lock:
             if last_n:
-                return self.telemetry_history[-int(last_n) :]
+                return self.telemetry_history[-int(last_n) :]  # noqa: E203
             return self.telemetry_history.copy()
 
 
@@ -409,13 +422,18 @@ class VisualizationEngine:
     """
 
     @staticmethod
-    def render_latency_bars(history: List[TelemetrySnapshot], width: int = 50) -> str:
+    def render_latency_bars(
+        history: List[TelemetrySnapshot], width: int = 50
+    ) -> str:
         """Render ASCII horizontal latency bars"""
         if not history:
             return ""
 
         output = ["\nLatency Pulse (ms):"]
-        max_lat = max(s.latency_ms for e in history for s in [e] if e.latency_ms) or 1.0
+        max_lat = (
+            max(s.latency_ms for e in history for s in [e] if e.latency_ms)
+            or 1.0
+        )
 
         for snap in history[-10:]:
             bar_len = int((snap.latency_ms / max_lat) * width)
@@ -445,7 +463,9 @@ Resource Integrity:
         """Render current governance phase"""
         status = phase.name
         rules_text = (
-            f" [Triggered: {', '.join(r.name for r in triggered)}]" if triggered else ""
+            f" [Triggered: {', '.join(r.name for r in triggered)}]"
+            if triggered
+            else ""
         )
         return f"SYSTEM_PHASE: >> {status} <<{rules_text}"
 
@@ -522,7 +542,11 @@ class OmniSentinel:
         """Graceful shutdown on signal"""
         logger.info(
             json.dumps(
-                {"level": "INFO", "msg": "Shutdown signal received", "signal": signum}
+                {
+                    "level": "INFO",
+                    "msg": "Shutdown signal received",
+                    "signal": signum,
+                }
             )
         )
         self.stop()
@@ -584,7 +608,11 @@ class OmniSentinel:
                 # Visualization (every 10 iterations to reduce noise)
                 if verbose and iteration % 10 == 0:
                     print(self.viz.render_resource_summary(snapshot))
-                    print(self.viz.render_phase_state(self.phase, triggered_rules))
+                    print(
+                        self.viz.render_phase_state(
+                            self.phase, triggered_rules
+                        )
+                    )
 
                     history = self.monitor.get_history(last_n=10)
                     print(self.viz.render_latency_bars(history))
@@ -595,11 +623,17 @@ class OmniSentinel:
         except Exception as e:
             logger.error(
                 json.dumps(
-                    {"level": "ERROR", "msg": "Monitoring loop error", "error": str(e)}
+                    {
+                        "level": "ERROR",
+                        "msg": "Monitoring loop error",
+                        "error": str(e),
+                    }
                 )
             )
         finally:
-            self._log_phase_transition(PhaseState.TERMINATED, "Monitoring stopped")
+            self._log_phase_transition(
+                PhaseState.TERMINATED, "Monitoring stopped"
+            )
 
     def _handle_rule_action(self, rule: Rule, snapshot: TelemetrySnapshot):
         """
@@ -638,12 +672,15 @@ class OmniSentinel:
     def _execute_kill_switch(self, rule: Rule, snapshot: TelemetrySnapshot):
         """KILL_SWITCH: Immediate termination"""
         self._log_phase_transition(
-            PhaseState.TERMINATED, f"KILL_SWITCH triggered by rule: {rule.name}"
+            PhaseState.TERMINATED,
+            f"KILL_SWITCH triggered by rule: {rule.name}",
         )
         print(f"\n{'!'*80}")
         print(f"! KILL_SWITCH ACTIVATED: {rule.name}")
         print(f"! {rule.description}")
-        print(f"! System terminated at {datetime.now(timezone.utc).isoformat()}")
+        print(
+            f"! System terminated at {datetime.now(timezone.utc).isoformat()}"
+        )
         print(f"{'!'*80}\n")
         self.running = False
         self.shutdown_event.set()
@@ -712,7 +749,7 @@ class OmniSentinel:
 def main():
     """Omni-Sentinel CLI entry point"""
     parser = argparse.ArgumentParser(
-        description="Omni-Sentinel: High-Frequency Computational Finance Monitoring",
+        description="Omni-Sentinel: High-Frequency Computational Finance Monitoring",  # noqa: E501
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -791,7 +828,7 @@ Version 1.0 | Classification: CONFIDENTIAL - BOARD USE ONLY
 Configuration:
   Region:          {args.region}
   Sample Interval: {args.interval}ms
-  Duration:        {'Infinite' if args.duration is None else f'{args.duration}s'}
+  Duration:        {'Infinite' if args.duration is None else f'{args.duration}s'}  # noqa: E501
   Verbose:         {args.verbose}
   Seed:            {args.seed}
 
