@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-# pylint: disable=missing-docstring, too-many-instance-attributes, broad-exception-caught, import-outside-toplevel, disallowed-name, unused-argument, f-string-without-interpolation, unspecified-encoding, unused-import
+# pylint: disable=missing-docstring, too-many-instance-attributes, broad-exception-caught
+# pylint: disable=import-outside-toplevel, disallowed-name, unused-argument
+# pylint: disable=f-string-without-interpolation, unspecified-encoding, unused-import
 """
 Omni-Sentinel CLI: High-Frequency Computational Finance Monitoring
 with Rule Engine and Conflict Resolution
@@ -46,7 +48,7 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple, cast
+from typing import Any, Dict, List, Optional, Tuple
 
 import psutil
 
@@ -55,10 +57,12 @@ import psutil
 # ============================================================================
 
 # FIX: [CWE-798] Secret Management - Load from environment or secure vault
-HMAC_SECRET = os.environ.get("OMNI_SENTINEL_HMAC_KEY", "_unset_")
-if HMAC_SECRET == "_unset_":
+import secrets
+HMAC_SECRET = os.environ.get("OMNI_SENTINEL_HMAC_KEY")
+if not HMAC_SECRET:
+    HMAC_SECRET = secrets.token_hex(32)
     print(
-        "[WARN] Using default HMAC key. Set OMNI_SENTINEL_HMAC_KEY env variable.",
+        "[INFO] OMNI_SENTINEL_HMAC_KEY not set. Using generated ephemeral key.",
         file=sys.stderr,
     )
 

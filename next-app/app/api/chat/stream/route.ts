@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Chat stream error:', error);
+    console.error('Chat stream error encountered');
     return NextResponse.json({ error: 'internal_server_error' }, { status: 500 });
   }
 }

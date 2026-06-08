@@ -8,7 +8,8 @@ WORKDIR /app
 RUN groupadd -r agiuser && useradd -r -g agiuser agiuser
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+# hadolint ignore=DL3008
+RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     espeak-ng \
     && rm -rf /var/lib/apt/lists/*
