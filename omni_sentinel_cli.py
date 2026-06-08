@@ -33,6 +33,7 @@ Security Mitigations:
 """
 
 import argparse
+import re
 import hashlib
 import hmac
 import json
@@ -237,6 +238,32 @@ class AuditLogEntry:
             hmac=hmac_digest,
         )
 
+    # FIX: [CWE-1333] Comprehensive PII detection patterns (non-backtracking)
+    PII_PATTERNS = {
+        "SSN": re.compile(r"\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b"),
+        "CREDIT_CARD": re.compile(r"\b(?:\d{4}[-\s]?){3}\d{4}\b"),
+        "CVV": re.compile(r"\b(?:cvv|cvc|cid)[\s:]*\d{3,4}\b", re.IGNORECASE),
+        "EMAIL": re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"),
+        "PHONE": re.compile(r"\b(?:\+?1[-.\s]?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}\b"),
+        "UK_NIN": re.compile(r"\b[A-CEGHJ-PR-TW-Z]{1}[A-CEGHJ-NPR-TW-Z]{1}\d{6}[A-D]{1}\b", re.IGNORECASE),
+        "SG_NRIC": re.compile(r"\b[STFG]\d{7}[A-Z]\b", re.IGNORECASE),
+        "HK_HKID": re.compile(r"\b[A-Z]{1,2}\d{6}\([0-9A]\)\b", re.IGNORECASE),
+        "PASSPORT": re.compile(r"\b[A-Z]{1,2}\d{6,9}\b"),
+        "BANK_ACCOUNT": re.compile(r"\b\d{8,17}\b"),
+        "API_KEY": re.compile(r"\b(?:api[_-]?key|apikey|access[_-]?token|auth[_-]?token)[\s:=]+[A-Za-z0-9\-_]{20,}\b", re.IGNORECASE),
+        "PASSWORD": re.compile(r"\b(?:password|passwd|pwd)[\s:=]+\S+", re.IGNORECASE),
+        "SECRET": re.compile(r"\b(?:secret|private[_-]?key)[\s:=]+\S+", re.IGNORECASE),
+    }
+
+    @staticmethod
+    def _redact_value(value: Any) -> Any:
+        if not isinstance(value, str):
+            return value
+        redacted = value
+        for pii_type, pattern in AuditLogEntry.PII_PATTERNS.items():
+            redacted = pattern.sub(f"<REDACTED_{pii_type}>", redacted)
+        return redacted
+
     @staticmethod
     def _sanitize_pii(data: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -244,13 +271,13 @@ class AuditLogEntry:
 
         FIX: [GDPR Art. 25] Privacy-by-Design
         """
-        pii_patterns = ["ssn", "credit_card", "password", "token", "api_key"]
+        pii_key_patterns = ["ssn", "credit_card", "password", "token", "api_key", "secret", "cvv", "nric", "hkid"]
         sanitized = {}
         for key, value in data.items():
-            if any(pattern in key.lower() for pattern in pii_patterns):
+            if any(pattern in key.lower() for pattern in pii_key_patterns):
                 sanitized[key] = "<REDACTED_PII>"
             else:
-                sanitized[key] = value
+                sanitized[key] = AuditLogEntry._redact_value(value)
         return sanitized
 
     def to_dict(self) -> Dict[str, Any]:
