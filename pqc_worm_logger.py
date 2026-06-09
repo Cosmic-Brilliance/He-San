@@ -21,9 +21,11 @@ class PQCWORMLogger:
         self.bucket = bucket
         self.batch: List[Dict[str, Any]] = []
         self.batch_size_threshold = 10
-        self.hmac_key = os.environ.get(
-            "OMNI_SENTINEL_HMAC_KEY", "default_pqc_key_placeholder"
-        )
+        self.hmac_key = os.environ.get("OMNI_SENTINEL_HMAC_KEY")
+        if not self.hmac_key or not self.hmac_key.strip():
+            raise ValueError(
+                "Missing required environment variable: OMNI_SENTINEL_HMAC_KEY"
+            )
 
     def add_entry(self, entry: Dict[str, Any]):
         """Add an entry to the current batch."""
