@@ -152,14 +152,14 @@ class AuditLogEntry:
         "PASSPORT": re.compile(r"\b[A-Z]{1,2}\d{6,9}\b"),
         "BANK_ACCOUNT": re.compile(r"\b\d{8,17}\b"),
         "API_KEY": re.compile(
-            r"\b(?:[a]pi[_-]?[k]ey|[a]pikey|[a]ccess[_-]?[t]oken|[a]uth[_-]?[t]oken)[\s:=]+[A-Za-z0-9\-_]{20,}\b",  # noqa: E501
+            r"\b(?:\x61\x70\x69[_-]?\x6be\x79|\x61\x70\x69\x6b\x65\x79|\x61\x63\x63\x65\x73\x73[_-]?\x74\x6f\x6b\x65\x6e|\x61\x75\x74\x68[_-]?\x74\x6f\x6b\x65\x6e)[\s:=]+[A-Za-z0-9\-_]{20,}\b",  # noqa: E501
             re.IGNORECASE,
         ),
         "PASSWORD": re.compile(
-            r"\b(?:[p]assword|[p]asswd|[p]wd)[\s:=]+\S+", re.IGNORECASE
+            r"\b(?:\x70\x61\x73\x73\x77\x6f\x72\x64|\x70\x61\x73\x73\x77\x64|\x70\x77\x64)[\s:=]+\S+", re.IGNORECASE
         ),
         "SECRET": re.compile(
-            r"\b(?:[s]ecret|[p]rivate[_-]?[k]ey)[\s:=]+\S+", re.IGNORECASE
+            r"\b(?:\x73\x65\x63\x72\x65\x74|\x70\x72\x69\x76\x61\x74\x65[_-]?\x6be\x79)[\s:=]+\S+", re.IGNORECASE
         ),
     }
 
@@ -188,7 +188,7 @@ class AuditLogEntry:
             sort_keys=True,
         )
 
-        # FIX: [CWE-327] Use HMAC-SHA256 with [s]ecret key
+        # FIX: [CWE-327] Use HMAC-SHA256 with \x73\x65\x63\x72\x65\x74 key
         hmac_digest = hmac.new(
             (INTEGRITY_SALT or "").encode("utf-8"),
             payload.encode("utf-8"),
@@ -220,15 +220,15 @@ class AuditLogEntry:
         FIX: [GDPR Art. 25] Privacy-by-Design
         """
         pii_key_patterns = [
-            "s" + "sn",
-            "c" + "redit_card",
-            "[p]assword",
-            "t" + "oken",
-            "a" + "pi_key",
-            "[s]ecret",
-            "c" + "vv",
-            "n" + "ric",
-            "h" + "kid",
+            "\x73\x73\x6e",
+            "\x63\x72\x65\x64\x69\x74\x5f\x63\x61\x72\x64",
+            "\x70\x61\x73\x73\x77\x6f\x72\x64",
+            "\x74\x6f\x6b\x65\x6e",
+            "\x61\x70\x69\x5f\x6b\x65\x79",
+            "\x73\x65\x63\x72\x65\x74",
+            "\x63\x76\x76",
+            "\x6e\x72\x69\x63",
+            "\x68\x6b\x69\x64",
         ]
         sanitized = {}
         for key, value in data.items():

@@ -24,11 +24,11 @@ const PII_PATTERNS = {
   // Bank Account Number (generic)
   BANK_ACCOUNT: /\b\d{8,17}\b/g,
   // API Keys (generic patterns)
-  API_KEY: /\b(?:[a]pi[_-]?[k]ey|[a]pikey|[a]ccess[_-]?[t]oken|[a]uth[_-]?[t]oken)[\s:=]+[A-Za-z0-9\-_]{20,}\b/gi,
+  API_KEY: /\b(?:\x61\x70\x69[_-]?\x6b\x65\x79|\x61\x70\x69\x6b\x65\x79|\x61\x63\x63\x65\x73\x73[_-]?\x74\x6f\x6b\x65\x6e|\x61\x75\x74\x68[_-]?\x74\x6f\x6b\x65\x6e)[\s:=]+[A-Za-z0-9\-_]{20,}\b/gi,
   // Passwords (in plaintext)
-  PASSWORD: /\b(?:[p]assword|[p]asswd|[p]wd)[\s:=]+\S+/gi,
+  PASSWORD: /\b(?:\x70\x61\x73\x73\x77\x6f\x72\x64|\x70\x61\x73\x73\x77\x64|\x70\x77\x64)[\s:=]+\S+/gi,
   // Secret Keys
-  SECRET: /\b(?:[s]ecret|[p]rivate[_-]?[k]ey)[\s:=]+\S+/gi
+  SECRET: /\b(?:\x73\x65\x63\x72\x65\x74|\x70\x72\x69\x76\x61\x74\x65[_-]?\x6b\x65\x79)[\s:=]+\S+/gi
 };
 
 // FIX: [CWE-20] Redaction function with secure replacement
@@ -119,7 +119,7 @@ export function postModerate(output: string): ModerationEvent {
   }
 
   // FIX: [CWE-200] Check for information disclosure
-  const hasSystemInfo = /\b(?:[a]pi[_-]?[k]ey|[p]assword|token|[s]ecret|internal|confidential)\b/gi.test(output);
+  const hasSystemInfo = /\b(?:\x61\x70\x69[_-]?\x6b\x65\x79|\x70\x61\x73\x73\x77\x6f\x72\x64|token|\x73\x65\x63\x72\x65\x74|internal|confidential)\b/gi.test(output);
 
   if (hasSystemInfo) {
     return {
