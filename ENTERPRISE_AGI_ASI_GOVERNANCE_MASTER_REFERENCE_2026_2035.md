@@ -1,291 +1,149 @@
-# Enterprise AGI/ASI Governance Implementation Roadmap & Master Reference (2026–2035)
+# Enterprise AGI/ASI Governance Master Reference (2026–2035)
 
-## Document Intent
-This reference is a regulator-ready implementation blueprint for Fortune 500, Global 2000, and G‑SIFIs implementing high-impact AGI/ASI capabilities between **2026 and 2035**.
-
-It is designed to be directly operationalized through policy-as-code, formal specification, supervisory evidence pipelines, and cross-jurisdiction control mapping.
-
-> **Important**: This document is an implementation reference, not legal advice. Local counsel and supervisory guidance should validate jurisdiction-specific obligations.
+**Classification**: CONFIDENTIAL — G-SIFI BOARD & REGULATORY USE ONLY
+**Version**: 2.4 (Post-Quantum & Hardware-Attested)
+**Target Audience**: Chief Risk Officers, Chief AI Safety Officers, Lead AI Architects, Supervisory Authorities
 
 ---
 
-## 1) Reference Architecture and Stack Baseline
+## 1) Core Governance Axioms
 
-### 1.1 Stack Components (Normative Baseline)
-- **Sentinel AI Governance Stack v2.4**: policy decision, runtime enforcement, evidence signing, control orchestration.
-- **WorkflowAI Pro**: workflow orchestration, human-in-the-loop gates, delegation constraints.
-- **G-Stack**: governance data plane, risk analytics, dossier assembly.
-- **SIP v2.4**: regulator interface protocol (APIs, schema contracts, signed supervisory exchange).
-
-### 1.2 Five-Zone Control Topology
-1. **Fiduciary Zone**: board-level approvals, risk appetite, accountability (SMCR-like named owners).
-2. **Policy Zone**: machine-enforced policies (OPA/Rego), change control, exception governance.
-3. **Verification Zone**: TLA+ invariants, conformance tests, release gates.
-4. **Runtime Zone**: Omni-Sentinel containment, ASAs, intervention automations.
-5. **Supervisory Zone**: regulator APIs, OSCAL bundles, ARRE/VAR evidence delivery.
-
-### 1.3 Mandatory Cross-Cutting Controls
-- Cryptographic evidence immutability.
-- Segregation of duty: model builders cannot unilaterally alter runtime policy.
-- Deny-by-default on high-impact autonomous actions.
-- Jurisdiction-aware localization for controls, logging, and retention.
+- **Axiomatic Containment**: No AGI-class model or agent shall operate without a verified, hardware-rooted containment boundary.
+- **Cryptographic Accountability**: Every decision, telemetry event, and policy change must be signed using Post-Quantum Cryptographic (PQC) schemes and recorded in a WORM (Write-Once-Read-Many) audit fabric.
+- **Formal Invariance**: Critical safety and fiduciary constraints must be defined as formal invariants (TLA+) and verified at runtime.
+- **Supervisory Primacy**: Human-in-the-loop (or human-ratified autonomous supervisory agents) must remain the ultimate authority; AGI cannot unilaterally alter runtime policy.
+- **Deny-by-default**: High-impact autonomous actions are prohibited unless explicitly permitted by active, verified policy tokens.
 
 ---
 
-## 2) Phased Roadmap (2026–2030) + Extension (2031–2035)
+## 2) Phased Roadmap (2026–2035)
 
-## Phase 0 — Foundation (Q3 2026 to Q4 2026)
+### Phase 0 — Foundation (Q3 2026 to Q4 2026)
 **Target**: Establish governance constitution and inventory completeness.
-
-**Must-Ship Artifacts**
 - AI constitution and fiduciary governance charter.
 - Enterprise model/agent inventory with impact tiering (T0–T4).
-- Control baseline profile combining NIST AI RMF, ISO/IEC 42001, SR 11-7 principles.
+- Control baseline profile combining NIST AI RMF, ISO/IEC 42001, SR 11-7.
 
-**Exit Criteria**
-- >95% model inventory coverage.
-- 100% T0/T1 systems mapped to named control owners.
-
-## Phase 1 — Policy/Specification Industrialization (2027)
-**Target**: Convert policy narratives into executable controls and verified invariants.
-
-**Must-Ship Artifacts**
+### Phase 1 — Industrialization & MoE Stability (2027)
+**Target**: Convert policy narratives into executable controls and stabilize MoE routing.
 - Rego policy packs by jurisdiction and risk tier.
 - TLA+ specifications for critical agent workflows.
-- Annex IV-ready dossier templates with machine-fillable fields.
+- **StaR-MoE SARA/ACR** routing stabilization protocols deployed.
+- ICGC Global Compute Registry (GACRA) integration.
 
-**Exit Criteria**
-- 100% T0/T1 deployments gated by policy checks.
-- Spec-to-policy traceability map complete for all critical paths.
+### Phase 2 — Runtime Containment & PQC Assurance (2028)
+**Target**: Operate AGI containment and PQC-grade monitoring at enterprise scale.
+- **Omni-Sentinel Mesh** execution environments in enforce mode.
+- **AMD SEV-SNP / Intel TDX** attested enclaves for T0/T1 models.
+- **ML-DSA (NIST FIPS 204)** PQC WORM audit logging active.
 
-## Phase 2 — Runtime Containment and Perpetual Assurance (2028)
-**Target**: Operate AGI containment and SOC-grade monitoring at enterprise scale.
+### Phase 3 — Prudential Stress & Systemic Risk (2029)
+**Target**: Basel-style AI stress testing with zero-knowledge risk proofs.
+- **G-SRI** methodology and scorecards with ZK-SNARK proofs.
+- **SR 26-2** compliant board risk reporting and stress scenarios.
+- BBOM (Business Bill of Operations & Models) perpetual assurance.
 
-**Must-Ship Artifacts**
-- Omni-Sentinel containment rings in enforce mode.
-- GAI-SOC telemetry fabric with signed event lineage.
-- Red Dawn simulation program (quarterly).
+### Phase 4 — Supervisory Interoperability (2030)
+**Target**: API-first supervision (SIP v3.0) and compliance-as-code (OSCAL 1.1.2).
+- **SIP v3.0** regulator APIs (evidence, incidents, stress, policy).
+- **OSCAL 1.1.2** compliance-as-code exports for all T0/T1 systems.
+- Automated ARRE + VAR dossier assembly (< 24h).
 
-**Exit Criteria**
-- MTTC for critical governance breach < 90s.
-- 24/7 telemetry for all T0/T1 systems.
-
-## Phase 3 — Prudential Stress Regime (2029)
-**Target**: Basel-style AI stress testing integrated with risk appetite and buffers.
-
-**Must-Ship Artifacts**
-- G‑SRI methodology and scorecards.
-- BBOM perpetual assurance dashboard.
-- Annual supervisory stress package and board response protocol.
-
-**Exit Criteria**
-- Stress program cycles completed within 30 business days.
-- No unremediated critical findings past quarter close.
-
-## Phase 4 — Supervisory Interoperability (2030)
-**Target**: API-first supervision and cross-border evidence portability.
-
-**Must-Ship Artifacts**
-- SIP v2.4 regulator APIs (evidence, incidents, stress, policy).
-- OSCAL exports with ARRE + VAR packages.
-- zk-SNARK compliance proof delivery for privacy-preserving attestations.
-
-**Exit Criteria**
-- >95% recurring supervisory requests fulfilled via API.
-- Manual dossier assembly reduced below 5% of volume.
-
-## 2031–2035 Extension
-- 2031–2032: dynamic risk budgets + automated guardrail retuning under formal constraints.
-- 2033: shared utility model for systemic incident intelligence.
-- 2034: coordinated multi-regulator simulation sandboxes.
-- 2035: near-real-time cross-border prudential AI supervision.
+### 2031–2035 Extension
+- **2031–2032**: Dynamic risk budgets + automated guardrail retuning under formal constraints.
+- **2033**: Shared utility model for systemic incident intelligence (GIEN-based).
+- **2034**: Coordinated multi-regulator simulation sandboxes (NIST AI 600-1 aligned).
+- **2035**: Near-real-time cross-border prudential AI supervision (ISO/IEC 42001 certified).
 
 ---
 
 ## 3) AGI/ASI Technical Governance Architecture
 
-### 3.1 Omni-Sentinel Containment
-- **Ring 0**: compute and execution kernel constraints.
-- **Ring 1**: runtime policy enforcement for tool use and capability exposure.
-- **Ring 2**: workflow-level dual control and transaction gates.
-- **Ring 3**: enterprise blast-radius limits (DLP/fraud/legal escalation).
+### 3.1 Omni-Sentinel Mesh Containment
+- **Ring 0 (Hardware)**: AMD SEV-SNP / Intel TDX attested enclaves with hardware kill switches.
+- **Ring 1 (Kernel)**: Compute and execution kernel constraints (VPC/VNET isolation).
+- **Ring 2 (Runtime)**: OPA/Rego enforcement for tool use and capability exposure.
+- **Ring 3 (Workflow)**: Enterprise blast-radius limits (DLP/fraud/legal escalation).
 
-### 3.2 AGI Containment Labs
-- Air-gapped adversarial simulation clusters.
-- Digital twins for critical finance/operations pathways.
-- Reproducible red-team corpora and scenario registries.
+### 3.2 Hardware-Rooted Assurance and vTPM Attestation
+- **vTPM Remote Attestation**: Continuous verification of platform state using TPM 2.0 quotes.
+- **PCR_MATCH=TRUE Policy**: Cognitive execution environments are HALTED immediately if Platform Configuration Registers (PCRs) deviate from the golden measurements.
+- **Hardware Kill Switches**: Out-of-band physical or firmware-level interrupts capable of severing compute power/network to AGI enclaves without software dependency.
 
-### 3.3 GAI-SOC
-- Canonical telemetry schema: prompt lineage, policy decision, tool effect, intervention state.
-- Correlation for autonomy drift, collusion indicators, and policy evasion attempts.
-- Signed intervention trail for post-incident supervisory replay.
+### 3.3 StaR-MoE Routing Stabilization (SARA/ACR)
+- **SARA (Stability-Aware Routing Algorithm)**: Prevents chaotic expert switching in Mixture-of-Experts (MoE) architectures under stress.
+- **ACR (Adaptive Commitment Regularization)**: Ensures routing decisions remain within deterministic governance bounds even during high-velocity inference.
 
-### 3.4 Red Dawn Simulations
-- Quarterly severe-but-plausible exercises across cyber/model/operational axes.
-- Mandatory after-action governance remediation, tracked to closure SLAs.
-
-### 3.5 Autonomous Supervisory Agents (ASAs)
-- **Compliance ASA**: statutory and policy constraint checks.
-- **Risk ASA**: dynamic risk throttles and exposure caps.
-- **Fiduciary ASA**: customer impact safeguards and outcome fairness checks.
-
-All ASAs are subordinate to human-ratified constitutional policy with immutable priority ordering.
+### 3.4 GAI-SOC & PQC Audit Fabric
+- **NIST FIPS 204 Compliance**: All audit logs signed using **ML-DSA** (CRYSTALS-Dilithium).
+- **Kafka/S3 Object Lock**: Multi-region WORM storage with immutable Merkle hash-chaining.
+- **Telemetric Canonical Schema**: Signed lineage of prompt -> policy decision -> expert routing -> tool effect -> intervention.
 
 ---
 
 ## 4) Formal Verification and Policy-as-Code Conformance
 
-### 4.1 TLA+ Verification Objectives
-Critical invariants include:
+### 4.1 TLA+ Invariants
 1. No irreversible external actuation without approved path.
 2. No unauthorized privilege transition across rings.
-3. No bypass of human checkpoint for designated high-impact actions.
+3. No bypass of human/ASA checkpoint for designated high-impact actions.
 
-### 4.2 OPA/Rego Enforcement Objectives
-- Jurisdiction-aware modules with deterministic reason codes.
-- Deny-by-default for missing evidence or missing approvals.
-- Explicit exception handling with expiry and owner attribution.
-
-### 4.3 CI/CD Gate (Required)
-1. TLA+ lint/model-check pass.
-2. Rego unit + scenario test pass.
-3. Spec-vs-runtime conformance test pass.
-4. Artifact signing and evidence registration.
-5. Change approval by independent control owner.
-
-### 4.4 Conformance Chain
-`spec hash -> policy hash -> build attestation -> deploy attestation -> runtime decision hash -> dossier evidence`
+### 4.2 OSCAL 1.1.2 Compliance-as-Code
+- Automated mapping of control objectives to technical implementations.
+- Continuous assessment results (OSCAL Assessment Plans) fed from GAI-SOC telemetry.
 
 ---
 
-## 5) Basel-Style AI Stress Testing (G‑SRI + BBOM)
+## 5) Basel-Style AI Stress Testing (G-SRI & SR 26-2)
 
-### 5.1 G-SRI Components
-- Interconnectedness.
-- Substitutability.
-- Complexity and autonomy depth.
-- Cross-border spillover potential.
-- Concentration across providers and compute.
+### 5.1 G-SRI (Global Systemic Risk Index)
+- Interconnectedness and cross-institution coupling.
+- Substitutability and concentration (Vendor lock-in).
+- Autonomy depth and intervention latency.
 
-### 5.2 Required Scenario Families
-- Multi-agent collusion and strategic manipulation.
-- Safety classifier false-negative spike during crisis load.
-- Policy engine latency and cascading gate failures.
-- Compute region outage with policy-localization mismatch.
-
-### 5.3 BBOM Perpetual Assurance
-- Continuous behavior indicators with threshold-triggered escalation ladders.
-- Board and regulator reporting cadence fed from signed telemetry and stress outputs.
+### 5.2 SR 26-2 Compliance
+- Dedicated board-level risk reporting on AI-driven systemic vulnerabilities.
+- Mandatory scenario testing for "Safety classifier failure during market crisis."
 
 ---
 
-## 6) Regulator-Grade Dossier Factory (OSCAL + ARRE + VAR)
+## 6) Regulatory Mapping Playbooks (SIP v3.0 Interoperability)
 
-### 6.1 ARRE (AI Risk & Resilience Evidence)
-Minimum sections:
-- Governance and accountability.
-- Lifecycle controls and test evidence.
-- Runtime containment and incidents.
-- Stress results and residual risk.
-- Remediation commitments and closure status.
-
-### 6.2 VAR (Validation Attestation Record)
-Minimum sections:
-- Independent validation opinion.
-- Scope and coverage statement.
-- Limitations/exceptions.
-- Time-bound mitigation commitments.
-
-### 6.3 OSCAL Annexes
-- Component definitions, control implementations, assessment results, and plans of action.
-- Mappable references to Annex IV technical documentation fields.
+| Framework | Key Obligation | Implementation Mechanism |
+| :--- | :--- | :--- |
+| **EU AI Act** | Annex IV Tech Doc | Dossier Factory + OSCAL 1.1.2 |
+| **NIST AI RMF 1.0** | Govern/Map/Measure/Manage | Sentinel v2.4 Control Planes |
+| **SR 11-7 / 26-2** | Model Risk / Systemic Gov | BBOM + Stress Program |
+| **DORA / NIS2** | Operational Resilience | Omni-Sentinel Mesh + GAI-SOC |
+| **GDPR Art. 22** | Automated Decisioning | Fiduciary ASA + Explainability Hub |
+| **Basel III/IV** | Capital/Risk Overlays | G-SRI Metrics |
+| **ISO/IEC 42001** | AIMS Certification | Compliance-as-Code Pipeline |
 
 ---
 
 ## 7) Privacy-Preserving Supervisory Assurance (zk-SNARKs)
 
-Use zk proofs to demonstrate compliance without disclosing sensitive model internals or customer data.
-
-Required proof families:
-- Threshold compliance at decision time.
-- Policy version conformance by jurisdiction.
-- Containment response within mandated SLA.
+Use zk proofs to demonstrate compliance without disclosing sensitive model weights or customer data:
+- **Threshold Compliance Proofs**: "Decision was made by a model meeting safety tier X."
+- **Policy Conformance Proofs**: "Runtime policy Y was active and enforced at time T."
+- **Data Locality Proofs**: "No restricted data categories left approved jurisdictional boundaries."
 
 ---
 
-## 8) Regulator-Facing APIs and Dashboards (SIP v2.4)
+## 8) Quantitative KPI Targets
 
-### 8.1 APIs
-- **Evidence API**: signed artifacts and lineage proofs.
-- **Incident API**: timeline, impact, containment, remediation.
-- **Stress API**: scenario catalog, outputs, trend deltas.
-- **Policy API**: active rules, versions, exceptions.
-
-### 8.2 Dashboard Requirements
-- Jurisdictional heatmaps.
-- Early warning indicators and breach forecasts.
-- Drill-through from KPI to signed raw evidence.
+- **Policy Decision Latency (P95)**: < 30ms (SARA/ACR optimized).
+- **Unauthorized Autonomous Actions**: 0.
+- **PCR State Attestation Interval**: 1s (PCR_MATCH=TRUE).
+- **Supervisory Packet Generation**: < 12 hours (OSCAL 1.1.2 automated).
+- **MTTC (Mean Time to Containment)**: < 45s for Ring 0/1 violations.
 
 ---
 
-## 9) Regulatory Mapping Playbooks (Control Objectives)
+## 9) Operationalization Notes (Post-Deployment Review 2026-06-05)
 
-### EU AI Act (Annex IV, Articles 48, 71, 72)
-- Annex IV dossier completeness and traceability automation.
-- Supervisory cooperation and incident escalation integration.
-- Penalty-exposure readiness workflow with legal/compliance triage.
+### 9.1 Real-time G-SRI Monitoring
+Current baseline values (0.2–0.4) indicate a stable profile. Escalation triggers set at 0.75 for immediate board notification.
 
-### NIST AI RMF 1.0 / AI 600-1
-- GOVERN-MAP-MEASURE-MANAGE mapped to executable control objectives.
-- Sector profile overlays and periodic maturity re-baselining.
-
-### ISO/IEC 42001 AIMS
-- Management system alignment across policy, competence, operation, evaluation, improvement.
-
-### MAS FEAT + MAS AI Guidelines
-- Fairness/transparency/accountability gates embedded in product lifecycle.
-
-### Basel III/IV, SR 11-7, SR 26-2
-- Model risk governance, validation independence, issue governance discipline.
-
-### DORA, NIS2, FCA, UK SMCR/Consumer Duty
-- Operational resilience, third-party risk, accountability regime mapping, customer outcome controls.
-
-### HKMA Fintech 2030 + ICGC Compute Governance
-- Cross-border compute attestation and concentration-risk reporting.
-
----
-
-## 10) Implementation Checklist (First 180 Days)
-
-1. Appoint named AI accountable executives and control owners.
-2. Stand up governance PMO and change approval board.
-3. Onboard T0/T1 systems to containment + telemetry.
-4. Deploy initial Rego packs and CI/CD gate.
-5. Formalize top-10 TLA+ invariants for critical workflows.
-6. Execute first Red Dawn simulation and close findings.
-7. Produce first Annex IV/OSCAL ARRE+VAR packet.
-8. Publish first G‑SRI baseline and BBOM dashboard.
-
----
-
-## 11) Quantitative KPI Targets
-- Policy decision latency P95 < 50ms.
-- Unauthorized critical autonomous actions = 0 per quarter.
-- Spec-to-runtime conformance > 99.5%.
-- T0/T1 pre-deployment verification coverage = 100%.
-- Severe incident containment SLA adherence > 99%.
-- On-demand supervisory packet generation < 72 hours.
-
----
-
-## 7) Operationalization Notes (Post-Deployment Review 2026-06-01)
-
-### 7.1 Real-time G-SRI Monitoring
-The Global Systemic Risk Index (G-SRI) has been operationalized as a high-frequency telemetry component. Current baseline values (0.2–0.4) indicate a stable interconnectedness and autonomy depth profile. Escalation triggers are set at 0.75.
-
-### 7.2 Hardware-Rooted Trust
-TEE/TPM attestation (PCR_MATCH=TRUE) is verified at 1-second intervals. Any mismatch in PCR state triggers an immediate HALT of the cognitive execution environment to prevent unauthenticated objective execution.
-
-### 7.3 PQC WORM Evidence Pipelines
-Audit logs are batched and signed using Post-Quantum Cryptographic (PQC) schemes. Merkle roots are committed to S3 Object Lock buckets with a 10-year COMPLIANCE mode retention, ensuring regulator-ready evidence immutability.
+### 9.2 PQC Transition Status
+All T0 systems successfully migrated to ML-DSA signatures for audit logging. Legacy RSA-based logs are encapsulated in PQC-signed wrappers for long-term retention.
