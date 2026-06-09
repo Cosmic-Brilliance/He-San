@@ -21,7 +21,7 @@
     "validation/validate_artifacts.py": "7dd13d463819e5fe8c5c44ad94e756840371a322a8356a0e8bb56d61d472870c",
     "validation/selftest_generate_artifact_manifest.py": "95e2beb5d663b1a8045f704eb047f94bc0cf70fdef3cdaf398e3ac125683a967",
     "validation/selftest_validate_artifacts.py": "ba359d7b9ce017e095eef67d4a1b75dfa5f03619ce29b73c89a641da9f0f78ec",
-    "validation/generate_artifact_manifest.py": "257ca36d32e7d20502710309e6a7b56ac846ed98c6ee3ad344fb820255f5f309",
+    "validation/generate_artifact_manifest.py": "66219dda4812e2090b37eaace3f9fd82d7ece75c0d6629f8234156c2dd741218",
     "validation/validate_dashboard_links.py": "e854e2c61ac6e31f880fce8e28c6ed95856d13a85fdfdbcf124df74925b1461a",
     "validation/lint_python_sources.py": "52b36b1427679624fd9778dc93cb7b318b4c882930e78c0947a37d5185dafae9"
   },
