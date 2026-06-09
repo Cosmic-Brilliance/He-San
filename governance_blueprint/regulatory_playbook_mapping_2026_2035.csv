@@ -16,3 +16,5 @@ UK SMCR,senior manager accountability,named_accountability,smcr_responsibility_m
 UK Consumer Duty,good customer outcomes,fiduciary_outcomes,consumer_outcome_assessment,fiduciary_asa_rules
 HKMA Fintech 2030,fintech risk governance and innovation controls,fintech_governance,hkma_readiness_packet,regulator_api_profile
 ICGC compute governance,compute concentration and cross-border controls,compute_governance,compute_attestation_bundle,zk_proof_attestations
+GDPR Article 22,automated individual decision-making and profiling,fiduciary_outcomes,explainability_dossier,fiduciary_asa_rules
+NIST FIPS 204,post-quantum cryptographic standards for digital signatures,pqc_audit_fabric,signed_audit_logs,pqc_worm_logger
