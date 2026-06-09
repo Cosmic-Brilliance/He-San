@@ -87,9 +87,7 @@ class PQCWORMLogger:
 if __name__ == "__main__":
     # Self-test if run directly
     logger = PQCWORMLogger()
-    print(
-        f"PQC WORM Logger initialized ({logger.pqc_algorithm}). Running self-test..."
-    )
+    print(f"PQC WORM Logger initialized ({logger.pqc_algorithm}). Running self-test...")
     for i in range(5):
         logger.add_entry(
             {"event": "COMPLIANCE_AUDIT", "index": i, "status": "PQC_VERIFIED"}
