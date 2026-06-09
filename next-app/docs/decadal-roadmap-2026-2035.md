@@ -125,6 +125,6 @@ G-SIFIs must implement the **Sentinel Interoperability Protocol (SIP v3.0)** to 
 
 ### 7.2 SIP v3.0 Protocol (GIEN Implementation)
 - **Signature:** ML DSA 87 (PQC-compliant).
-- **Attestation:** PCR MATCH = TRUE (Hardware-enforced).
+- **Attestation:** PCR_MATCH = TRUE (Hardware-enforced).
 - **Transport:** mTLS with Noise Protocol handshake.
 - **Defense:** Shared Threat Intelligence Protocol (STIP) active across GIEN nodes.
