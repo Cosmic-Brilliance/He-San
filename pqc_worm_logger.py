@@ -74,7 +74,7 @@ class PQCWORMLogger:
             )
             self.batch = []
             return True
-        except Exception as e:
+        except (OSError, TypeError, ValueError) as e:
             print(f"[PQC-WORM] {timestamp} - ERROR: Failed to commit batch: {str(e)}")
             return False
 
