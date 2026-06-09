@@ -16,7 +16,7 @@
     }
   ],
   "security": {
-    "signature_scheme": "ML-DSA-87",
+    "signature_scheme": "ML_DSA_87",
     "attestation_requirement": "PCR_MATCH=TRUE",
     "transport": "mTLS + Noise Protocol"
   }

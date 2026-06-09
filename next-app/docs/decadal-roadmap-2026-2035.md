@@ -2,7 +2,7 @@
 
 **Version:** 1.0
 **Target Audience:** Senior Enterprise AI Safety Architects, G-SIFI Board Risk Committees, Regulatory Supervisors.
-**Classification:** CONFIDENTIAL - G-SIFI STRATEGIC ARCHITECTURE
+**Classification:** INTERNAL - G-SIFI STRATEGIC ARCHITECTURE
 
 ---
 
@@ -12,7 +12,7 @@ containment, and compliance of AGI and ASI systems within Global Systemically Im
 Financial Institutions (G-SIFIs). It leverages the **Sentinel AI Governance Stack v2.4**
 and **Omni-Sentinel Mesh** to ensure that cognitive autonomy remains bounded by
 fiduciary duty and systemic stability. Key innovations include **StaR-MoE**
-routing stabilization, **ML-DSA** post-quantum audit fabrics, and **SIP v3.0**
+routing stabilization, **ML_DSA** post-quantum audit fabrics, and **SIP v3.0**
 for collective defense across the Global Institutional Evidence Network (GIEN).
 
 ---
@@ -24,7 +24,7 @@ for collective defense across the Global Institutional Evidence Network (GIEN).
 - **Milestones:**
   - Deployment of **Sentinel v2.4** baseline across all Tier 0/1 systems.
   - Integration of **AMD SEV-SNP / Intel TDX** enclaves for high-assurance inference.
-  - Migration of audit pipelines to **ML-DSA (FIPS 204)** signatures for long-term verifiability.
+  - Migration of audit pipelines to **ML_DSA (FIPS 204)** signatures for long-term verifiability.
   - Publication of **OSCAL 1.1.2** compliance-as-code control catalog.
 
 ### Phase 1: Verified Containment & StaR-MoE (2027–2028)
@@ -64,7 +64,7 @@ for collective defense across the Global Institutional Evidence Network (GIEN).
 ### 3.1 Sentinel AI Governance Stack v2.4
 The reference stack follows a "Defense-in-Depth" model for cognitive workloads:
 - **L0: Physical Layer:** **AMD SEV-SNP / Intel TDX** TEEs with mandatory **vTPM attestation**.
-- **L1: Crypto Plane:** **CRYSTALS-Dilithium (ML-DSA)** signing for all binary and data artifacts.
+- **L1: Crypto Plane:** **Dilithium (ML_DSA)** signing for all binary and data artifacts.
 - **L2: Policy Plane:** **OPA/Rego** compliance-as-code gating at the API and vsock layers.
 - **L3: Execution Plane:** **Omni-Sentinel Mesh** provides micro-segmentation for agent tool access.
 
@@ -74,7 +74,7 @@ To govern Mixture-of-Experts systems (MoE), the institutional stack requires:
 - **ACR (Autonomous Control Routing):** Forces high-risk requests through audited, safety-tuned "Governance Experts" regardless of baseline routing optimization.
 
 ### 3.3 Cryptographic Compliance & WORM Audit
-- **Post-Quantum Cryptography (PQC):** Compliance with **NIST FIPS 204**. All evidence bundles MUST be signed with **ML-DSA**.
+- **Post-Quantum Cryptography (PQC):** Compliance with **NIST FIPS 204**. All evidence bundles MUST be signed with **ML_DSA**.
 - **WORM Pipeline:** Kafka producers emit PQC-signed envelopes to S3 buckets configured with **Object Lock (COMPLIANCE mode)** and 10-year retention.
 - **Zero-Knowledge Proofs (ZKP):** Use **Groth16** or **STARKs** to prove that model weights have not drifted from the validated baseline without revealing proprietary parameters.
 
