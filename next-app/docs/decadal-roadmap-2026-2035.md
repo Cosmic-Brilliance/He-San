@@ -7,7 +7,13 @@
 ---
 
 ## 1. Executive Summary
-This document defines the decadal roadmap and technical architecture for the governance, containment, and compliance of AGI and ASI systems within Global Systemically Important Financial Institutions (G-SIFIs). It leverages the **Sentinel AI Governance Stack v2.4** and **Omni-Sentinel Mesh** to ensure that cognitive autonomy remains bounded by fiduciary duty and systemic stability. Key innovations include **StaR-MoE** routing stabilization, **ML-DSA** post-quantum audit fabrics, and **SIP v3.0** for collective defense across the Global Institutional Evidence Network (GIEN).
+This document defines the decadal roadmap and technical architecture for the governance,
+containment, and compliance of AGI and ASI systems within Global Systemically Important
+Financial Institutions (G-SIFIs). It leverages the **Sentinel AI Governance Stack v2.4**
+and **Omni-Sentinel Mesh** to ensure that cognitive autonomy remains bounded by
+fiduciary duty and systemic stability. Key innovations include **StaR-MoE**
+routing stabilization, **ML-DSA** post-quantum audit fabrics, and **SIP v3.0**
+for collective defense across the Global Institutional Evidence Network (GIEN).
 
 ---
 
