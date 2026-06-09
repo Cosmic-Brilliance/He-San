@@ -43,8 +43,10 @@ class PQCWORMLogger:
         batch_data = json.dumps(self.batch, sort_keys=True)
         batch_hash = hashlib.sha384(batch_data.encode()).hexdigest()
 
-        # Simulated PQC Signature (Hybrid RSA-PSS + Dilithium-like placeholder)
-        signature = hmac.new(
+        # Placeholder authenticity/integrity tag using HMAC-SHA512.
+        # NOTE: This is NOT a post-quantum digital signature and does NOT provide non-repudiation.
+        # Replace with a real PQC signature scheme (e.g., ML-DSA/Dilithium) for production.
+        mac_tag = hmac.new(
             self.hmac_key.encode(), batch_hash.encode(), hashlib.sha512
         ).hexdigest()
 
@@ -56,7 +58,7 @@ class PQCWORMLogger:
             "retention_period": "10y",
             "entries_count": len(self.batch),
             "merkle_root": batch_hash,
-            "pqc_signature": f"pqc_v1_{signature}",
+            "auth_tag_hmac_sha512_placeholder": f"hmac_sha512_v1_{mac_tag}",
             "data": self.batch,
         }
 
