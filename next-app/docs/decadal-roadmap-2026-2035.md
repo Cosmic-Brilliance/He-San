@@ -113,3 +113,18 @@ G-SIFIs must implement the **Sentinel Interoperability Protocol (SIP v3.0)** to 
 - **Evidence Immutability:** 100% (PQC-verified).
 - **Time to Supervisory Packet:** < 2 hours (API-driven).
 - **G-SRI Stability:** < 0.5 (Scale 0-1).
+
+---
+
+## 7. Appendix: Technical Specification Snippets
+
+### 7.1 StaR-MoE Stabilization (SARA/ACR)
+- **Constraint:** Max routing drift < 5% per 1k tokens.
+- **Enforcement:** Mandatory ACR trigger on PII detection or systemic risk threshold > 0.75.
+- **Verification:** TLA+ spec `containment_invariants.tla` must pass for all routing transitions.
+
+### 7.2 SIP v3.0 Protocol (GIEN Implementation)
+- **Signature:** ML DSA 87 (PQC-compliant).
+- **Attestation:** PCR MATCH = TRUE (Hardware-enforced).
+- **Transport:** mTLS with Noise Protocol handshake.
+- **Defense:** Shared Threat Intelligence Protocol (STIP) active across GIEN nodes.

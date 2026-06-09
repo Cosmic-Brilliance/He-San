@@ -5,8 +5,6 @@
   "artifacts": {
     "control_mapping_matrix.csv": "8af4170e62e6aec3c12f3f554d29fe31e6c59c196cd9b3e1590f1238597ce228",
     "regulatory_playbook_mapping_2026_2035.csv": "4b7fe3dd0ba9d7371d1e7df30c9611f0cf346bc9f9680def62f144b575f9605d",
-    "sip_v3_interop_spec.json": "defd1fbac6accc4c075b9fbd07a56a3fa393d2ada89c3dc4de00cede65c982c6",
-    "tech_reqs_moe_stabilization.json": "8a02fd302e29bd8e7685cb41e471199c350de2d1e1d3e71ecb0a5fa08c7604b5",
     "annex_iv_technical_documentation_template.json": "08c791484963dd46e0cbc0e76358229813816f66d050df4e9783e73ded7e787e",
     "evidence_event_schema.json": "7c84f8fce1cefeff08308a2763c086eb4ede05881881cd53c484e879df04196a",
     "compliance_profile_2026.json": "aa3468812b58f05095d6d96e7def2262c90c142dadf13bf91bc8423a85ae345f",
@@ -21,7 +19,7 @@
     "validation/validate_artifacts.py": "7dd13d463819e5fe8c5c44ad94e756840371a322a8356a0e8bb56d61d472870c",
     "validation/selftest_generate_artifact_manifest.py": "95e2beb5d663b1a8045f704eb047f94bc0cf70fdef3cdaf398e3ac125683a967",
     "validation/selftest_validate_artifacts.py": "ba359d7b9ce017e095eef67d4a1b75dfa5f03619ce29b73c89a641da9f0f78ec",
-    "validation/generate_artifact_manifest.py": "dc537aa6f25a71fc8b440122adcfd398783c34dc364f23eb2475db41f591cf5e",
+    "validation/generate_artifact_manifest.py": "e84e124e918c0287882d96c56ea24fc5e945680e641130b5054ab0fc3a532e56",
     "validation/validate_dashboard_links.py": "e854e2c61ac6e31f880fce8e28c6ed95856d13a85fdfdbcf124df74925b1461a",
     "validation/lint_python_sources.py": "52b36b1427679624fd9778dc93cb7b318b4c882930e78c0947a37d5185dafae9"
   },
