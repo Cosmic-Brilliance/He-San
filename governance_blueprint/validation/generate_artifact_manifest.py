@@ -52,7 +52,8 @@ def build_manifest(preserve_timestamp: bool = False) -> Dict[str, Any]:
     external_artifacts = {ext_id: ext_hash}
 
     now = datetime.now(timezone.utc).replace(microsecond=0)
-    generated_utc = now.isoformat().replace("+00:00", "Z")
+    iso_str = now.isoformat().replace("+00:00", "Z")
+    generated_utc = iso_str
 
     if preserve_timestamp and os.path.exists(
         base_dir / "artifact_manifest.json"
