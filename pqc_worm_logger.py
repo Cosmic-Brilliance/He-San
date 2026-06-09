@@ -65,7 +65,11 @@ class PQCWORMLogger:
         # and a PutObject call to an S3 bucket with Object Lock configured.
         filename = f"worm_batch_{batch_id}.json"
         try:
-            with open(filename, "w", encoding="utf-8") as f:
+            flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+            if hasattr(os, "O_NOFOLLOW"):
+                flags |= os.O_NOFOLLOW
+            fd = os.open(filename, flags, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
                 json.dump(payload, f, indent=2)
 
             print(
