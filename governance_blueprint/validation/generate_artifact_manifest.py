@@ -46,14 +46,9 @@ def build_manifest(preserve_timestamp: bool = False) -> Dict[str, Any]:
 
     # External artifacts
     ext_id = "REGULATOR_READY_AGI_ASI_TECHNICAL_REPORT_2026_2030.md"
-    # Break up hash to avoid false positives in security scanners
-    h_parts = [
-        "b590161a765704a9",
-        "d320dcfa1fae2f82",
-        "85bc816fc56cf250",
-        "62e11c3f27bcdbee",
-    ]
-    ext_hash = "".join(h_parts)
+    # Store the expected checksum directly for transparency and reviewability.
+    # If scanners flag this known-good value, prefer scanner allowlisting/tuning.
+    ext_hash = "b590161a765704a9d320dcfa1fae2f8285bc816fc56cf25062e11c3f27bcdbee"
     external_artifacts = {ext_id: ext_hash}
 
     now = datetime.now(timezone.utc).replace(microsecond=0)
