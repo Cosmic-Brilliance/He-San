@@ -21,9 +21,11 @@ class PQCWORMLogger:
         self.bucket = bucket
         self.batch: List[Dict[str, Any]] = []
         self.batch_size_threshold = 10
-        self.hmac_key = os.environ.get(
-            "OMNI_SENTINEL_HMAC_KEY", "default_pqc_key_placeholder"
-        )
+        self.hmac_key = os.environ.get("OMNI_SENTINEL_HMAC_KEY")
+        if not self.hmac_key or not self.hmac_key.strip():
+            raise ValueError(
+                "Missing required environment variable: OMNI_SENTINEL_HMAC_KEY"
+            )
 
     def add_entry(self, entry: Dict[str, Any]):
         """Add an entry to the current batch."""
@@ -43,8 +45,10 @@ class PQCWORMLogger:
         batch_data = json.dumps(self.batch, sort_keys=True)
         batch_hash = hashlib.sha384(batch_data.encode()).hexdigest()
 
-        # Simulated PQC Signature (Hybrid RSA-PSS + Dilithium-like placeholder)
-        signature = hmac.new(
+        # Placeholder authenticity/integrity tag using HMAC-SHA512.
+        # NOTE: This is NOT a post-quantum digital signature and does NOT provide non-repudiation.
+        # Replace with a real PQC signature scheme (e.g., ML-DSA/Dilithium) for production.
+        mac_tag = hmac.new(
             self.hmac_key.encode(), batch_hash.encode(), hashlib.sha512
         ).hexdigest()
 
@@ -56,7 +60,7 @@ class PQCWORMLogger:
             "retention_period": "10y",
             "entries_count": len(self.batch),
             "merkle_root": batch_hash,
-            "pqc_signature": f"pqc_v1_{signature}",
+            "auth_tag_hmac_sha512_placeholder": f"hmac_sha512_v1_{mac_tag}",
             "data": self.batch,
         }
 
@@ -65,7 +69,11 @@ class PQCWORMLogger:
         # and a PutObject call to an S3 bucket with Object Lock configured.
         filename = f"worm_batch_{batch_id}.json"
         try:
-            with open(filename, "w", encoding="utf-8") as f:
+            flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+            if hasattr(os, "O_NOFOLLOW"):
+                flags |= os.O_NOFOLLOW
+            fd = os.open(filename, flags, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
                 json.dump(payload, f, indent=2)
 
             print(
@@ -74,7 +82,7 @@ class PQCWORMLogger:
             )
             self.batch = []
             return True
-        except Exception as e:
+        except (OSError, TypeError, ValueError) as e:
             print(f"[PQC-WORM] {timestamp} - ERROR: Failed to commit batch: {str(e)}")
             return False
 
