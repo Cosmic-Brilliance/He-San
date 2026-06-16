@@ -1,5 +1,5 @@
 version: 1.0.0
-last_updated: 2026-04-29
+last_updated: 2026-06-16
 controls:
   - id: CTRL-HITL-001
     name: Human review for high-impact AI decisions
@@ -22,3 +22,15 @@ controls:
     evidence:
       - drift_dashboard
       - incident_escalation_tickets
+  - id: CTRL-FAIR-004
+    name: Demographic Parity ZK Proof for retail expert nodes
+    mapped_regimes: [mas_feat]
+    owner: ai_safety_office
+    evidence:
+      - demographic_parity_proof
+  - id: CTRL-XAI-005
+    name: Contextual Attribution Envelopes (CAE) for interpretability
+    mapped_regimes: [hkma_ethics]
+    owner: ai_platform_engineering
+    evidence:
+      - cae_specification

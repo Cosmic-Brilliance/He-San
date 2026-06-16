@@ -1,0 +1,13 @@
+{
+  "proof_id": "zk-dp-2026-001",
+  "statement": "Demographic Parity proof for retail credit expert node",
+  "proving_system": "groth16",
+  "public_inputs": [
+    "threshold:0.8",
+    "actual_disparity:0.85"
+  ],
+  "verification": {
+    "gc_ir_verifier": "https://sentinel.internal/verifiers/zk-dp-v1.json",
+    "key_fingerprint": "SHA256:VERIFIED_ZK_PROOF_KEY_FINGERPRINT_PLACEHOLDER"
+  }
+}
