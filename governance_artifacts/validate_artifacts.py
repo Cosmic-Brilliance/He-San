@@ -9,7 +9,7 @@ from datetime import date, datetime, timezone
 
 ROOT = Path(__file__).resolve().parent
 REGIME_PATTERN = re.compile(r"^[a-z0-9_]+$")
-VALIDATOR_VERSION = "1.0.0"
+VALIDATOR_VERSION = "1.0.1"
 
 
 def get_checks():
@@ -22,6 +22,8 @@ def get_checks():
         ("validate_runbooks", validate_runbooks),
         ("validate_kpi_kri_schema", validate_kpi_kri_schema),
         ("validate_rego_policy", validate_rego_policy),
+        ("validate_zk_proofs", validate_zk_proofs),
+        ("validate_cae_specification", validate_cae_specification),
     ]
 
 
@@ -40,8 +42,6 @@ def assert_keys(obj: dict[str, Any], keys, name):
     missing = [k for k in keys if k not in obj]
     if missing:
         raise AssertionError(f"{name}: missing keys {missing}")
-
-
 
 
 def assert_type(value: Any, expected_type: type, name: str):
@@ -186,6 +186,28 @@ def validate_rego_policy():
         if token not in text:
             raise AssertionError(f"rego policy missing token: {token}")
 
+def validate_zk_proofs():
+    from jsonschema import validate
+    schema = load_json(ROOT / "zk" / "proof_statement_schema.json")
+    zk_dir = ROOT / "zk"
+    proofs = list(zk_dir.glob("*.json"))
+    if not proofs:
+         raise AssertionError("no ZK proofs found in zk directory")
+    for proof_path in proofs:
+        if proof_path.name == "proof_statement_schema.json":
+            continue
+        data = load_json(proof_path)
+        validate(instance=data, schema=schema)
+
+def validate_cae_specification():
+    spec_path = ROOT / "interpretability" / "cae_specification.yaml"
+    if not spec_path.exists():
+         raise AssertionError(f"CAE specification missing at {spec_path}")
+    data = load_yaml(spec_path)
+    assert_keys(data, ["specification_version", "last_updated", "cae_definition"], "cae_specification")
+    assert_keys(data["cae_definition"], ["name", "description", "fields"], "cae_definition")
+    assert_non_empty_list(data["cae_definition"]["fields"], "cae_definition.fields")
+
 
 def run_all_checks() -> dict[str, str]:
     checks = get_checks()
@@ -250,7 +272,7 @@ def main(argv: list[str] | None = None):
             print(json.dumps(payload, indent=2))
         elif not args.quiet:
             print("Governance artifacts validation: PASS")
-    except AssertionError as exc:
+    except Exception as exc:
         payload = {
             "status": "FAIL",
             "generated_at_utc": datetime.now(timezone.utc).isoformat(),
