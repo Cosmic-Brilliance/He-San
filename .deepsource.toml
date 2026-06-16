@@ -1,0 +1,17 @@
+version = 1
+
+[[analyzers]]
+name = "python"
+enabled = true
+
+[[analyzers]]
+name = "javascript"
+enabled = true
+
+[[analyzers]]
+name = "shellcheck"
+enabled = true
+
+[[analyzers]]
+name = "secrets"
+enabled = true
