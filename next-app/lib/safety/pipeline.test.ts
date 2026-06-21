@@ -23,6 +23,50 @@ describe('Safety Pipeline', () => {
     expect(result).not.toContain('123-45-6789');
   });
 
+  describe('APAC PII Redaction', () => {
+    it('should redact Singapore NRIC (S1234567A)', () => {
+      const input = 'My NRIC is S1234567A';
+      const result = steerPrompt(input);
+      expect(result).toContain('<REDACTED_SG_NRIC>');
+      expect(result).not.toContain('S1234567A');
+    });
+
+    it('should redact Singapore FIN (T1234567A)', () => {
+      const input = 'My FIN is T1234567A';
+      const result = steerPrompt(input);
+      expect(result).toContain('<REDACTED_SG_NRIC>');
+      expect(result).not.toContain('T1234567A');
+    });
+
+    it('should redact Singapore M-series FIN (M1234567A)', () => {
+      const input = 'My M-series FIN is M1234567A';
+      const result = steerPrompt(input);
+      expect(result).toContain('<REDACTED_SG_NRIC>');
+      expect(result).not.toContain('M1234567A');
+    });
+
+    it('should redact Hong Kong HKID (A123456(1))', () => {
+      const input = 'My HKID is A123456(1)';
+      const result = steerPrompt(input);
+      expect(result).toContain('<REDACTED_HK_HKID>');
+      expect(result).not.toContain('A123456(1)');
+    });
+
+    it('should redact Hong Kong HKID (A123456(A))', () => {
+      const input = 'My HKID is A123456(A)';
+      const result = steerPrompt(input);
+      expect(result).toContain('<REDACTED_HK_HKID>');
+      expect(result).not.toContain('A123456(A)');
+    });
+
+    it('should redact Hong Kong HKID with two leading letters (AB123456(1))', () => {
+      const input = 'My HKID is AB123456(1)';
+      const result = steerPrompt(input);
+      expect(result).toContain('<REDACTED_HK_HKID>');
+      expect(result).not.toContain('AB123456(1)');
+    });
+  });
+
   it('should block unsafe content in postModerate', () => {
     const output = 'To make a bomb, you need...';
     const result = postModerate(output);

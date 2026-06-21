@@ -9,7 +9,7 @@ name = "javascript"
 enabled = true
 
 [[analyzers]]
-name = "shellcheck"
+name = "shell"
 enabled = true
 
 [[analyzers]]
