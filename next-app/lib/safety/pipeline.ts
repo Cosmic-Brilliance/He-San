@@ -15,10 +15,10 @@ const PII_PATTERNS = {
   PHONE: /\b(?:\+?1[-.\s]?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}\b/g,
   // UK National Insurance Number
   UK_NIN: /\b[A-CEGHJ-PR-TW-Z]{1}[A-CEGHJ-NPR-TW-Z]{1}\d{6}[A-D]{1}\b/gi,
-  // Singapore NRIC/FIN
-  SG_NRIC: /\b[STFG]\d{7}[A-Z]\b/gi,
+  // Singapore NRIC/FIN (including M-series)
+  SG_NRIC: /\b[STFGM]\d{7}[A-Z]\b/gi,
   // Hong Kong HKID
-  HK_HKID: /\b[A-Z]{1,2}\d{6}\([0-9A]\)\b/gi,
+  HK_HKID: /\b[A-Z]{1,2}\d{6}\([0-9A]\)/gi,
   // Passport Number (generic)
   PASSPORT: /\b[A-Z]{1,2}\d{6,9}\b/g,
   // Bank Account Number (generic)
@@ -36,7 +36,17 @@ function redactPII(input: string): string {
   let redacted = input;
 
   // Apply all PII patterns
-  Object.entries(PII_PATTERNS).forEach(([type, pattern]) => {
+  // Sort patterns by ID to ensure consistent replacement order,
+  // especially helpful if patterns overlap (e.g., HKID and PASSPORT)
+  const orderedPatterns = Object.entries(PII_PATTERNS).sort(([a], [b]) => {
+    // Specifically prioritize HKID over PASSPORT because HKID regex is more specific
+    if (a === 'HK_HKID') return -1;
+    if (b === 'HK_HKID') return 1;
+    return 0;
+  });
+
+  orderedPatterns.forEach(([type, pattern]) => {
+    pattern.lastIndex = 0;
     redacted = redacted.replace(pattern, `<REDACTED_${type}>`);
   });
 
@@ -46,7 +56,10 @@ function redactPII(input: string): string {
 // FIX: [CWE-707] Enhanced preFilter with comprehensive PII detection
 export function preFilter(input: string): ModerationEvent {
   // Check for PII presence
-  const hasPII = Object.values(PII_PATTERNS).some(pattern => pattern.test(input));
+  const hasPII = Object.values(PII_PATTERNS).some(pattern => {
+    pattern.lastIndex = 0;
+    return pattern.test(input);
+  });
 
   if (hasPII) {
     return {
@@ -65,7 +78,10 @@ export function preFilter(input: string): ModerationEvent {
     /[;&|`$].*(?:rm|sudo|chmod|wget|curl)/gi  // Command injection
   ];
 
-  const hasInjection = INJECTION_PATTERNS.some(pattern => pattern.test(input));
+  const hasInjection = INJECTION_PATTERNS.some(pattern => {
+    pattern.lastIndex = 0;
+    return pattern.test(input);
+  });
 
   if (hasInjection) {
     return {
@@ -108,7 +124,10 @@ export function postModerate(output: string): ModerationEvent {
     /\b(?:drug|narcotic|cocaine|heroin|methamphetamine)\b/gi
   ];
 
-  const hasUnsafeContent = UNSAFE_PATTERNS.some(pattern => pattern.test(output));
+  const hasUnsafeContent = UNSAFE_PATTERNS.some(pattern => {
+    pattern.lastIndex = 0;
+    return pattern.test(output);
+  });
 
   if (hasUnsafeContent) {
     return {
