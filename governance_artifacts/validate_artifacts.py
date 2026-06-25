@@ -39,6 +39,7 @@ def load_json(path: Path):
 def load_yaml(path: Path):
     """Load a YAML file."""
     import yaml
+
     with path.open() as f:
         return yaml.safe_load(f)
 
@@ -93,7 +94,11 @@ def validate_control_library():
     assert_non_empty_list(data["controls"], "control_library.controls")
     seen_control_ids: set[str] = set()
     for idx, control in enumerate(data["controls"]):
-        assert_keys(control, ["id", "name", "mapped_regimes", "owner", "evidence"], f"control[{idx}]")
+        assert_keys(
+            control,
+            ["id", "name", "mapped_regimes", "owner", "evidence"],
+            f"control[{idx}]",
+        )
         assert_type(control["id"], str, f"control[{idx}].id")
         if control["id"] in seen_control_ids:
             raise AssertionError(f"duplicate control id detected: {control['id']}")
@@ -114,19 +119,34 @@ def validate_model_registry():
     assert_non_empty_list(data["models"], "model_registry.models")
     seen_model_ids: set[str] = set()
     for m in data["models"]:
-        m_id = m.get('model_id', 'unknown')
-        assert_keys(m, ["model_id", "use_case", "risk_tier", "deployment_status", "controls", "validation"], f"model:{m_id}")
+        m_id = m.get("model_id", "unknown")
+        assert_keys(
+            m,
+            ["model_id", "use_case", "risk_tier", "deployment_status", "controls", "validation"],
+            f"model:{m_id}",
+        )
         assert_type(m["model_id"], str, f"model:{m_id}.model_id")
         if m["model_id"] in seen_model_ids:
             raise AssertionError(f"duplicate model id detected: {m['model_id']}")
         seen_model_ids.add(m["model_id"])
         assert_non_empty_list(m["controls"], f"model:{m_id}.controls")
-        assert_keys(m["validation"], ["last_validation", "next_due", "independent_validation"], f"model:{m_id}.validation")
-        last_val = to_date(m["validation"]["last_validation"], f"model:{m_id}.validation.last_validation")
+        assert_keys(
+            m["validation"],
+            ["last_validation", "next_due", "independent_validation"],
+            f"model:{m_id}.validation",
+        )
+        last_val = to_date(
+            m["validation"]["last_validation"],
+            f"model:{m_id}.validation.last_validation",
+        )
         next_due = to_date(m["validation"]["next_due"], f"model:{m_id}.validation.next_due")
         if next_due < last_val:
             raise AssertionError(f"model:{m_id}.validation.next_due precedes last_validation")
-        assert_type(m["validation"]["independent_validation"], bool, f"model:{m_id}.validation.independent_validation")
+        assert_type(
+            m["validation"]["independent_validation"],
+            bool,
+            f"model:{m_id}.validation.independent_validation",
+        )
 
 
 def validate_control_references():
@@ -179,7 +199,11 @@ def validate_runbooks():
 def validate_kpi_kri_schema():
     """Validate the KPI/KRI dashboard schema."""
     data = load_json(ROOT / "board_kpi_kri_dashboard_schema.json")
-    assert_keys(data, ["$schema", "title", "type", "properties", "required"], "kpi_kri_schema")
+    assert_keys(
+        data,
+        ["$schema", "title", "type", "properties", "required"],
+        "kpi_kri_schema",
+    )
     assert_type(data["properties"], dict, "kpi_kri_schema.properties")
     assert_non_empty_list(data["required"], "kpi_kri_schema.required")
     for required_root in ("reporting_period", "kpis", "kris"):
@@ -190,9 +214,20 @@ def validate_kpi_kri_schema():
             raise AssertionError(f"kpi_kri_schema.properties missing {section}")
         section_obj = data["properties"][section]
         assert_type(section_obj, dict, f"kpi_kri_schema.properties.{section}")
-        assert_keys(section_obj, ["type", "properties", "required"], f"kpi_kri_schema.properties.{section}")
-        assert_type(section_obj["properties"], dict, f"kpi_kri_schema.properties.{section}.properties")
-        assert_non_empty_list(section_obj["required"], f"kpi_kri_schema.properties.{section}.required")
+        assert_keys(
+            section_obj,
+            ["type", "properties", "required"],
+            f"kpi_kri_schema.properties.{section}",
+        )
+        assert_type(
+            section_obj["properties"],
+            dict,
+            f"kpi_kri_schema.properties.{section}.properties",
+        )
+        assert_non_empty_list(
+            section_obj["required"],
+            f"kpi_kri_schema.properties.{section}.required",
+        )
 
 
 def validate_rego_policy():
@@ -210,6 +245,7 @@ def validate_rego_policy():
 def validate_zk_proofs():
     """Validate ZK proofs against their schema and check business constraints."""
     from jsonschema import validate
+
     schema = load_json(ROOT / "zk" / "proof_statement_schema.json")
     zk_dir = ROOT / "zk"
     proofs = list(zk_dir.glob("*.json"))
@@ -228,7 +264,9 @@ def validate_zk_proofs():
                     try:
                         delta = float(input_str.split(":")[1])
                         if delta > 0.05:
-                            raise AssertionError(f"{proof_path.name}: demographic parity delta {delta} exceeds limit 0.05")
+                            raise AssertionError(
+                                f"{proof_path.name}: demographic parity delta {delta} exceeds limit 0.05"
+                            )
                     except (ValueError, IndexError):
                         raise AssertionError(f"{proof_path.name}: invalid actual_delta format")
 
@@ -239,10 +277,17 @@ def validate_cae_specification():
     if not spec_path.exists():
         raise AssertionError(f"CAE specification missing at {spec_path}")
     data = load_yaml(spec_path)
-    assert_keys(data, ["specification_version", "last_updated", "cae_definition"], "cae_specification")
-    assert_keys(data["cae_definition"], ["name", "description", "fields"], "cae_definition")
+    assert_keys(
+        data,
+        ["specification_version", "last_updated", "cae_definition"],
+        "cae_specification",
+    )
+    assert_keys(
+        data["cae_definition"],
+        ["name", "description", "fields"],
+        "cae_definition",
+    )
     assert_non_empty_list(data["cae_definition"]["fields"], "cae_definition.fields")
-
 
 
 def validate_cae_envelopes():
@@ -254,7 +299,17 @@ def validate_cae_envelopes():
 
     for env_path in envelopes:
         data = load_json(env_path)
-        assert_keys(data, ["attribution_source", "context_window", "ethical_hash", "attribution_score", "timestamp"], "cae_envelope")
+        assert_keys(
+            data,
+            [
+                "attribution_source",
+                "context_window",
+                "ethical_hash",
+                "attribution_score",
+                "timestamp",
+            ],
+            "cae_envelope",
+        )
         assert_type(data["attribution_score"], float, "cae_envelope.attribution_score")
         if not (0.0 <= data["attribution_score"] <= 1.0):
             raise AssertionError("cae_envelope.attribution_score must be between 0 and 1")
@@ -267,6 +322,7 @@ def validate_cae_envelopes():
                 raise AssertionError("cae_envelope.timestamp is stale (older than 7 days)")
         except ValueError:
             raise AssertionError(f"invalid timestamp format: {ts_str}")
+
 
 def run_all_checks() -> dict[str, str]:
     """Run all available validation checks."""
@@ -296,10 +352,28 @@ def main(argv: list[str] | None = None):
     """Entry point for the validator script."""
     parser = argparse.ArgumentParser(description="Validate governance artifacts.")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON output.")
-    parser.add_argument("--quiet", action="store_true", help="Suppress success output; failures still print.")
-    parser.add_argument("--output", type=str, default="", help="Optional file path to write JSON result payload.")
-    parser.add_argument("--list-checks", action="store_true", help="List available check names and exit.")
-    parser.add_argument("--check", action="append", default=[], help="Run only the named check(s); repeatable.")
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress success output; failures still print.",
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="",
+        help="Optional file path to write JSON result payload.",
+    )
+    parser.add_argument(
+        "--list-checks",
+        action="store_true",
+        help="List available check names and exit.",
+    )
+    parser.add_argument(
+        "--check",
+        action="append",
+        default=[],
+        help="Run only the named check(s); repeatable.",
+    )
     parser.add_argument("--version", action="store_true", help="Print validator version and exit.")
     args = parser.parse_args(argv)
 
