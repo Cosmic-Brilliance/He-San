@@ -54,7 +54,9 @@ def assert_keys(obj: dict[str, Any], keys, name):
 def assert_type(value: Any, expected_type: type, name: str):
     """Assert that a value has the expected type."""
     if not isinstance(value, expected_type):
-        raise AssertionError(f"{name}: expected {expected_type.__name__}, got {type(value).__name__}")
+        raise AssertionError(
+            f"{name}: expected {expected_type.__name__}, got {type(value).__name__}"
+        )
 
 
 def assert_non_empty_list(value: Any, name: str):
@@ -107,7 +109,9 @@ def validate_control_library():
         for regime in control["mapped_regimes"]:
             assert_type(regime, str, f"control[{idx}].mapped_regimes[]")
             if not REGIME_PATTERN.match(regime):
-                raise AssertionError(f"control[{idx}].mapped_regimes contains invalid value '{regime}'")
+                raise AssertionError(
+                    f"control[{idx}].mapped_regimes contains invalid value '{regime}'"
+                )
         assert_non_empty_list(control["evidence"], f"control[{idx}].evidence")
 
 
@@ -199,11 +203,7 @@ def validate_runbooks():
 def validate_kpi_kri_schema():
     """Validate the KPI/KRI dashboard schema."""
     data = load_json(ROOT / "board_kpi_kri_dashboard_schema.json")
-    assert_keys(
-        data,
-        ["$schema", "title", "type", "properties", "required"],
-        "kpi_kri_schema",
-    )
+    assert_keys(data, ["$schema", "title", "type", "properties", "required"], "kpi_kri_schema")
     assert_type(data["properties"], dict, "kpi_kri_schema.properties")
     assert_non_empty_list(data["required"], "kpi_kri_schema.required")
     for required_root in ("reporting_period", "kpis", "kris"):
@@ -215,9 +215,7 @@ def validate_kpi_kri_schema():
         section_obj = data["properties"][section]
         assert_type(section_obj, dict, f"kpi_kri_schema.properties.{section}")
         assert_keys(
-            section_obj,
-            ["type", "properties", "required"],
-            f"kpi_kri_schema.properties.{section}",
+            section_obj, ["type", "properties", "required"], f"kpi_kri_schema.properties.{section}"
         )
         assert_type(
             section_obj["properties"],
@@ -225,8 +223,7 @@ def validate_kpi_kri_schema():
             f"kpi_kri_schema.properties.{section}.properties",
         )
         assert_non_empty_list(
-            section_obj["required"],
-            f"kpi_kri_schema.properties.{section}.required",
+            section_obj["required"], f"kpi_kri_schema.properties.{section}.required"
         )
 
 
@@ -256,8 +253,6 @@ def validate_zk_proofs():
             continue
         data = load_json(proof_path)
         validate(instance=data, schema=schema)
-
-        # Business constraint: MAS FEAT delta <= 0.05
         if "Demographic Parity" in data.get("statement", ""):
             for input_str in data.get("public_inputs", []):
                 if input_str.startswith("actual_delta:"):
@@ -265,7 +260,7 @@ def validate_zk_proofs():
                         delta = float(input_str.split(":")[1])
                         if delta > 0.05:
                             raise AssertionError(
-                                f"{proof_path.name}: demographic parity delta {delta} exceeds limit 0.05"
+                                f"{proof_path.name}: delta {delta} exceeds limit 0.05"
                             )
                     except (ValueError, IndexError):
                         raise AssertionError(f"{proof_path.name}: invalid actual_delta format")
@@ -278,15 +273,9 @@ def validate_cae_specification():
         raise AssertionError(f"CAE specification missing at {spec_path}")
     data = load_yaml(spec_path)
     assert_keys(
-        data,
-        ["specification_version", "last_updated", "cae_definition"],
-        "cae_specification",
+        data, ["specification_version", "last_updated", "cae_definition"], "cae_specification"
     )
-    assert_keys(
-        data["cae_definition"],
-        ["name", "description", "fields"],
-        "cae_definition",
-    )
+    assert_keys(data["cae_definition"], ["name", "description", "fields"], "cae_definition")
     assert_non_empty_list(data["cae_definition"]["fields"], "cae_definition.fields")
 
 
@@ -296,7 +285,6 @@ def validate_cae_envelopes():
     envelopes = list(cae_dir.glob("cae_envelope.json"))
     if not envelopes:
         return
-
     for env_path in envelopes:
         data = load_json(env_path)
         assert_keys(
@@ -313,8 +301,6 @@ def validate_cae_envelopes():
         assert_type(data["attribution_score"], float, "cae_envelope.attribution_score")
         if not (0.0 <= data["attribution_score"] <= 1.0):
             raise AssertionError("cae_envelope.attribution_score must be between 0 and 1")
-
-        # Verify timestamp is recent (within 7 days for audit)
         ts_str = data["timestamp"]
         try:
             ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
@@ -348,18 +334,23 @@ def run_selected_checks(check_names: list[str]) -> dict[str, str]:
     return results
 
 
-def output_report(payload: dict[str, Any], args: argparse.Namespace):
-    """Handle report output to console and file."""
+def output_report(status: str, args: argparse.Namespace, checks=None, error=None):
+    """Handle report output."""
+    payload = {"status": status, "generated_at_utc": datetime.now(timezone.utc).isoformat()}
+    if checks:
+        payload["checks"] = checks
+    if error:
+        payload["error"] = str(error)
     if args.output:
         out = Path(args.output)
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     if args.json:
         print(json.dumps(payload, indent=2))
-    elif payload["status"] == "PASS" and not args.quiet:
+    elif status == "PASS" and not args.quiet:
         print("Governance artifacts validation: PASS")
-    elif payload["status"] == "FAIL":
-        print(f"Governance artifacts validation: FAIL - {payload.get('error')}")
+    elif status == "FAIL":
+        print(f"Governance artifacts validation: FAIL - {error}")
 
 
 def main(argv: list[str] | None = None):
@@ -367,30 +358,19 @@ def main(argv: list[str] | None = None):
     parser = argparse.ArgumentParser(description="Validate governance artifacts.")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON output.")
     parser.add_argument(
-        "--quiet",
-        action="store_true",
-        help="Suppress success output; failures still print.",
+        "--quiet", action="store_true", help="Suppress success output; failures still print."
     )
     parser.add_argument(
-        "--output",
-        type=str,
-        default="",
-        help="Optional file path to write JSON result payload.",
+        "--output", type=str, default="", help="Optional file path to write JSON result payload."
     )
     parser.add_argument(
-        "--list-checks",
-        action="store_true",
-        help="List available check names and exit.",
+        "--list-checks", action="store_true", help="List available check names and exit."
     )
     parser.add_argument(
-        "--check",
-        action="append",
-        default=[],
-        help="Run only the named check(s); repeatable.",
+        "--check", action="append", default=[], help="Run only the named check(s); repeatable."
     )
     parser.add_argument("--version", action="store_true", help="Print validator version and exit.")
     args = parser.parse_args(argv)
-
     if args.version:
         v_payload = {"version": VALIDATOR_VERSION}
         if args.json:
@@ -398,7 +378,6 @@ def main(argv: list[str] | None = None):
         else:
             print(VALIDATOR_VERSION)
         return
-
     if args.list_checks:
         checks = [name for name, _ in get_checks()]
         if args.json:
@@ -407,22 +386,11 @@ def main(argv: list[str] | None = None):
             for check in checks:
                 print(check)
         return
-
     try:
         results = run_selected_checks(args.check) if args.check else run_all_checks()
-        payload = {
-            "status": "PASS",
-            "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-            "checks": results,
-        }
-        output_report(payload, args)
+        output_report("PASS", args, checks=results)
     except Exception as exc:  # pylint: disable=broad-except
-        payload = {
-            "status": "FAIL",
-            "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-            "error": str(exc),
-        }
-        output_report(payload, args)
+        output_report("FAIL", args, error=exc)
         raise SystemExit(1) from exc
 
 

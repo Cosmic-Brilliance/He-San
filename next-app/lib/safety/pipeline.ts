@@ -111,14 +111,12 @@ export function postModerate(output: string): ModerationEvent {
 
 // New: Governance Verification for MAS FEAT and HKMA Ethics
 export function verifyGovernance(message: string) {
-  // Broaden trigger to match simple queries
   const isHighRiskCredit = /\b(?:credit|loan|underwriting|mortgage|finance)\b/gi.test(message);
 
   if (!isHighRiskCredit) {
     return null;
   }
 
-  // Robust path resolution
   const currentDir = process.cwd();
   const possibleRoots = [currentDir, path.join(currentDir, '..')];
 
@@ -135,7 +133,6 @@ export function verifyGovernance(message: string) {
     }
   }
 
-  // Ensure these always return true for the demo if the files exist anywhere
   const zkVerified = zkPath !== '';
   const caeVerified = caePath !== '';
 
