@@ -26,6 +26,7 @@ def get_checks():
         ("validate_rego_policy", validate_rego_policy),
         ("validate_zk_proofs", validate_zk_proofs),
         ("validate_cae_specification", validate_cae_specification),
+        ("validate_cae_envelopes", validate_cae_envelopes),
     ]
 
 
@@ -207,7 +208,7 @@ def validate_rego_policy():
 
 
 def validate_zk_proofs():
-    """Validate ZK proofs against their schema."""
+    """Validate ZK proofs against their schema and check business constraints."""
     from jsonschema import validate
     schema = load_json(ROOT / "zk" / "proof_statement_schema.json")
     zk_dir = ROOT / "zk"
@@ -220,6 +221,17 @@ def validate_zk_proofs():
         data = load_json(proof_path)
         validate(instance=data, schema=schema)
 
+        # Business constraint: MAS FEAT delta <= 0.05
+        if "Demographic Parity" in data.get("statement", ""):
+            for input_str in data.get("public_inputs", []):
+                if input_str.startswith("actual_delta:"):
+                    try:
+                        delta = float(input_str.split(":")[1])
+                        if delta > 0.05:
+                            raise AssertionError(f"{proof_path.name}: demographic parity delta {delta} exceeds limit 0.05")
+                    except (ValueError, IndexError):
+                        raise AssertionError(f"{proof_path.name}: invalid actual_delta format")
+
 
 def validate_cae_specification():
     """Validate the CAE specification artifact."""
@@ -231,6 +243,30 @@ def validate_cae_specification():
     assert_keys(data["cae_definition"], ["name", "description", "fields"], "cae_definition")
     assert_non_empty_list(data["cae_definition"]["fields"], "cae_definition.fields")
 
+
+
+def validate_cae_envelopes():
+    """Validate Contextual Attribution Envelopes."""
+    cae_dir = ROOT / "interpretability"
+    envelopes = list(cae_dir.glob("cae_envelope.json"))
+    if not envelopes:
+        return
+
+    for env_path in envelopes:
+        data = load_json(env_path)
+        assert_keys(data, ["attribution_source", "context_window", "ethical_hash", "attribution_score", "timestamp"], "cae_envelope")
+        assert_type(data["attribution_score"], float, "cae_envelope.attribution_score")
+        if not (0.0 <= data["attribution_score"] <= 1.0):
+            raise AssertionError("cae_envelope.attribution_score must be between 0 and 1")
+
+        # Verify timestamp is recent (within 7 days for audit)
+        ts_str = data["timestamp"]
+        try:
+            ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+            if (datetime.now(timezone.utc) - ts).days > 7:
+                raise AssertionError("cae_envelope.timestamp is stale (older than 7 days)")
+        except ValueError:
+            raise AssertionError(f"invalid timestamp format: {ts_str}")
 
 def run_all_checks() -> dict[str, str]:
     """Run all available validation checks."""
