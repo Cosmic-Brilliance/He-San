@@ -51,7 +51,7 @@ export function preFilter(input: string): ModerationEvent {
     /ignore\s+(all\s+)?previous\s+instructions?/gi,
     /system\s+prompt/gi,
     /\bexec\b|\beval\b|\bscript\b/gi,
-    /<script[\s\S]*?>[\s\S]*?<\/script\s*>/gi, // FIX: Match script end tags with spaces like </script >
+    /<script[\s\S]*?>[\s\S]*?<\/script[\s\S]*?>/gi, // FIX: Robustly match script end tags like </script\t\n bar>
     /[;&|`$].*(?:rm|sudo|chmod|wget|curl)/gi
   ];
 

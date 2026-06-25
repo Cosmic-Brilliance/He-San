@@ -73,6 +73,20 @@ async function handleStream(message: string) {
   return { stream, status: 200 };
 }
 
+function createStreamResponse(res: any) {
+  if ('error' in res) {
+    return NextResponse.json({ error: res.error, reason: res.reason }, { status: res.status });
+  }
+
+  return new Response(res.stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    }
+  });
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -84,18 +98,7 @@ export async function POST(req: NextRequest) {
 
     const { message } = result.data;
     const res = await handleStream(message);
-
-    if ('error' in res) {
-      return NextResponse.json({ error: res.error, reason: res.reason }, { status: res.status });
-    }
-
-    return new Response(res.stream, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      }
-    });
+    return createStreamResponse(res);
 
   } catch (error) {
     console.error('Chat stream error encountered');
@@ -112,16 +115,5 @@ export async function GET(req: NextRequest) {
   }
 
   const res = await handleStream(message);
-
-  if ('error' in res) {
-    return NextResponse.json({ error: res.error, reason: res.reason }, { status: res.status });
-  }
-
-  return new Response(res.stream, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-    }
-  });
+  return createStreamResponse(res);
 }

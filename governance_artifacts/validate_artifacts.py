@@ -348,6 +348,20 @@ def run_selected_checks(check_names: list[str]) -> dict[str, str]:
     return results
 
 
+def output_report(payload: dict[str, Any], args: argparse.Namespace):
+    """Handle report output to console and file."""
+    if args.output:
+        out = Path(args.output)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    if args.json:
+        print(json.dumps(payload, indent=2))
+    elif payload["status"] == "PASS" and not args.quiet:
+        print("Governance artifacts validation: PASS")
+    elif payload["status"] == "FAIL":
+        print(f"Governance artifacts validation: FAIL - {payload.get('error')}")
+
+
 def main(argv: list[str] | None = None):
     """Entry point for the validator script."""
     parser = argparse.ArgumentParser(description="Validate governance artifacts.")
@@ -378,8 +392,9 @@ def main(argv: list[str] | None = None):
     args = parser.parse_args(argv)
 
     if args.version:
+        v_payload = {"version": VALIDATOR_VERSION}
         if args.json:
-            print(json.dumps({"version": VALIDATOR_VERSION}, indent=2))
+            print(json.dumps(v_payload, indent=2))
         else:
             print(VALIDATOR_VERSION)
         return
@@ -400,28 +415,14 @@ def main(argv: list[str] | None = None):
             "generated_at_utc": datetime.now(timezone.utc).isoformat(),
             "checks": results,
         }
-        if args.output:
-            out = Path(args.output)
-            out.parent.mkdir(parents=True, exist_ok=True)
-            out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-        if args.json:
-            print(json.dumps(payload, indent=2))
-        elif not args.quiet:
-            print("Governance artifacts validation: PASS")
+        output_report(payload, args)
     except Exception as exc:  # pylint: disable=broad-except
         payload = {
             "status": "FAIL",
             "generated_at_utc": datetime.now(timezone.utc).isoformat(),
             "error": str(exc),
         }
-        if args.output:
-            out = Path(args.output)
-            out.parent.mkdir(parents=True, exist_ok=True)
-            out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-        if args.json:
-            print(json.dumps(payload, indent=2))
-        else:
-            print(f"Governance artifacts validation: FAIL - {exc}")
+        output_report(payload, args)
         raise SystemExit(1) from exc
 
 

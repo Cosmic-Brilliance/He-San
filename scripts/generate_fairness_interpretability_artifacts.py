@@ -15,7 +15,10 @@ def generate_zk_proof():
         "proof_id": f"zk-dp-{int(time.time())}",
         "statement": "Demographic Parity proof for retail credit expert node",
         "proving_system": "groth16",
-        "public_inputs": ["threshold:0.05", f"actual_delta:{round(0.02 + (time.time() % 0.02), 4)}"],
+        "public_inputs": [
+            "threshold:0.05",
+            f"actual_delta:{round(0.02 + (time.time() % 0.02), 4)}",
+        ],
         "verification": {
             "gc_ir_verifier": "https://sentinel.internal/verifiers/zk-dp-v1.json",
             "key_fingerprint": "SHA256:7f8e9d0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c",
