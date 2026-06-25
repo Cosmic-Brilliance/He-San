@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "generated_at_utc": "2026-06-20T17:00:05.056159+00:00",
+  "generated_at_utc": "2026-06-25T11:16:30.072142+00:00",
   "checks": {
     "validate_control_library": "PASS",
     "validate_model_registry": "PASS",
@@ -11,6 +11,7 @@
     "validate_kpi_kri_schema": "PASS",
     "validate_rego_policy": "PASS",
     "validate_zk_proofs": "PASS",
-    "validate_cae_specification": "PASS"
+    "validate_cae_specification": "PASS",
+    "validate_cae_envelopes": "PASS"
   }
 }

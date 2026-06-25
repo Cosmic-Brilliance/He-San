@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { preFilter, steerPrompt, postModerate } from '@/lib/safety/pipeline';
+import { preFilter, steerPrompt, postModerate, verifyGovernance } from '@/lib/safety/pipeline';
 
 export const runtime = 'nodejs';
 
-// Input validation schema
 const ChatRequestSchema = z.object({
   message: z.string().min(1).max(2000),
 });
@@ -19,15 +18,68 @@ async function* fakeStream(text: string) {
   }
 }
 
-/**
- * Governed Chat Stream API
- * Implements:
- * - Input validation with Zod (CWE-20)
- * - Safety pre-filtering (PII, injection)
- * - Prompt steering (Governance)
- * - Post-moderation (Unsafe content, info disclosure)
- * - Structured logging/telemetry
- */
+async function handleStream(message: string) {
+  const pre = preFilter(message);
+  if (pre.action === 'block') {
+    return { error: 'blocked', reason: pre.reason, status: 403 };
+  }
+
+  const governance = verifyGovernance(message);
+  const safePrompt = steerPrompt(message);
+
+  let reply = "";
+  if (governance && governance.risk_tier === "high") {
+     reply = `[GOVERNED RESPONSE - HIGH RISK CREDIT]\nProcessing request with verified attestations for MAS FEAT and HKMA Ethics.\n\nResponse: ${safePrompt.slice(0, 50)}...`;
+  } else {
+     reply = `Governed Reply: ${safePrompt.slice(0, 50)}...`;
+  }
+
+  const post = postModerate(reply);
+  if (post.action === 'block') {
+    return { error: 'unsafe_output', reason: post.reason, status: 403 };
+  }
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      const meta = {
+        layer: 'governance_v1',
+        model: 'sentinel-secure',
+        version: '1.0.1',
+        latencyMs: 15,
+        pre,
+        post,
+        governance,
+      };
+
+      controller.enqueue(encode(`event: meta\ndata: ${JSON.stringify(meta)}\n\n`));
+
+      for await (const chunk of fakeStream(reply)) {
+        await new Promise(r => setTimeout(r, 10));
+        controller.enqueue(encode(`event: token\ndata: ${JSON.stringify(chunk)}\n\n`));
+      }
+
+      controller.enqueue(encode(`event: done\n\n`));
+      controller.close();
+    }
+  });
+
+  return { stream, status: 200 };
+}
+
+function processRes(res: any) {
+  if ('error' in res) {
+    return NextResponse.json({ error: res.error, reason: res.reason }, { status: res.status });
+  }
+
+  return new Response(res.stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    }
+  });
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -37,58 +89,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'invalid_request', details: result.error.format() }, { status: 400 });
     }
 
-    const { message } = result.data;
-
-    // 1. Pre-filtering
-    const pre = preFilter(message);
-    if (pre.action === 'block') {
-      return NextResponse.json({ error: 'blocked', reason: pre.reason }, { status: 403 });
-    }
-
-    // 2. Prompt Steering (Governance)
-    const safePrompt = steerPrompt(message);
-
-    // In a real app, you would call your LLM here with safePrompt
-    const reply = `Governed Reply: ${message.slice(0, 50)}...`;
-
-    // 3. Post-moderation
-    const post = postModerate(reply);
-    if (post.action === 'block') {
-      // In a real stream, you'd handle this differently, but for this MVP:
-      return NextResponse.json({ error: 'unsafe_output', reason: post.reason }, { status: 403 });
-    }
-
-    const stream = new ReadableStream({
-      async start(controller) {
-        const meta = {
-          layer: 'governance_v1',
-          model: 'sentinel-secure',
-          version: '1.0.0',
-          latencyMs: 12,
-          pre,
-          post,
-        };
-
-        controller.enqueue(encode(`event: meta\ndata: ${JSON.stringify(meta)}\n\n`));
-
-        for (const chunk of fakeStream(reply)) {
-          await new Promise(r => setTimeout(r, 10));
-          controller.enqueue(encode(`event: token\ndata: ${JSON.stringify(chunk)}\n\n`));
-        }
-
-        controller.enqueue(encode(`event: done\n\n`));
-        controller.close();
-      }
-    });
-
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      }
-    });
-
+    return processRes(await handleStream(result.data.message));
   } catch (error) {
     console.error('Chat stream error encountered');
     return NextResponse.json({ error: 'internal_server_error' }, { status: 500 });
@@ -96,13 +97,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const message = searchParams.get('q');
-
-  if (!message) {
-    return NextResponse.json({ error: 'missing_query' }, { status: 400 });
-  }
-
-  // Reuse logic or redirect to POST
-  return NextResponse.json({ error: 'use_post_for_streaming' }, { status: 405 });
+  const msg = new URL(req.url).searchParams.get('q');
+  if (!msg) return NextResponse.json({ error: 'missing_query' }, { status: 400 });
+  return processRes(await handleStream(msg));
 }

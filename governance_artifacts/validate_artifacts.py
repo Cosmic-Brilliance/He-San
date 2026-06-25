@@ -26,6 +26,7 @@ def get_checks():
         ("validate_rego_policy", validate_rego_policy),
         ("validate_zk_proofs", validate_zk_proofs),
         ("validate_cae_specification", validate_cae_specification),
+        ("validate_cae_envelopes", validate_cae_envelopes),
     ]
 
 
@@ -38,6 +39,7 @@ def load_json(path: Path):
 def load_yaml(path: Path):
     """Load a YAML file."""
     import yaml
+
     with path.open() as f:
         return yaml.safe_load(f)
 
@@ -52,7 +54,9 @@ def assert_keys(obj: dict[str, Any], keys, name):
 def assert_type(value: Any, expected_type: type, name: str):
     """Assert that a value has the expected type."""
     if not isinstance(value, expected_type):
-        raise AssertionError(f"{name}: expected {expected_type.__name__}, got {type(value).__name__}")
+        raise AssertionError(
+            f"{name}: expected {expected_type.__name__}, got {type(value).__name__}"
+        )
 
 
 def assert_non_empty_list(value: Any, name: str):
@@ -92,7 +96,11 @@ def validate_control_library():
     assert_non_empty_list(data["controls"], "control_library.controls")
     seen_control_ids: set[str] = set()
     for idx, control in enumerate(data["controls"]):
-        assert_keys(control, ["id", "name", "mapped_regimes", "owner", "evidence"], f"control[{idx}]")
+        assert_keys(
+            control,
+            ["id", "name", "mapped_regimes", "owner", "evidence"],
+            f"control[{idx}]",
+        )
         assert_type(control["id"], str, f"control[{idx}].id")
         if control["id"] in seen_control_ids:
             raise AssertionError(f"duplicate control id detected: {control['id']}")
@@ -101,7 +109,9 @@ def validate_control_library():
         for regime in control["mapped_regimes"]:
             assert_type(regime, str, f"control[{idx}].mapped_regimes[]")
             if not REGIME_PATTERN.match(regime):
-                raise AssertionError(f"control[{idx}].mapped_regimes contains invalid value '{regime}'")
+                raise AssertionError(
+                    f"control[{idx}].mapped_regimes contains invalid value '{regime}'"
+                )
         assert_non_empty_list(control["evidence"], f"control[{idx}].evidence")
 
 
@@ -113,19 +123,34 @@ def validate_model_registry():
     assert_non_empty_list(data["models"], "model_registry.models")
     seen_model_ids: set[str] = set()
     for m in data["models"]:
-        m_id = m.get('model_id', 'unknown')
-        assert_keys(m, ["model_id", "use_case", "risk_tier", "deployment_status", "controls", "validation"], f"model:{m_id}")
+        m_id = m.get("model_id", "unknown")
+        assert_keys(
+            m,
+            ["model_id", "use_case", "risk_tier", "deployment_status", "controls", "validation"],
+            f"model:{m_id}",
+        )
         assert_type(m["model_id"], str, f"model:{m_id}.model_id")
         if m["model_id"] in seen_model_ids:
             raise AssertionError(f"duplicate model id detected: {m['model_id']}")
         seen_model_ids.add(m["model_id"])
         assert_non_empty_list(m["controls"], f"model:{m_id}.controls")
-        assert_keys(m["validation"], ["last_validation", "next_due", "independent_validation"], f"model:{m_id}.validation")
-        last_val = to_date(m["validation"]["last_validation"], f"model:{m_id}.validation.last_validation")
+        assert_keys(
+            m["validation"],
+            ["last_validation", "next_due", "independent_validation"],
+            f"model:{m_id}.validation",
+        )
+        last_val = to_date(
+            m["validation"]["last_validation"],
+            f"model:{m_id}.validation.last_validation",
+        )
         next_due = to_date(m["validation"]["next_due"], f"model:{m_id}.validation.next_due")
         if next_due < last_val:
             raise AssertionError(f"model:{m_id}.validation.next_due precedes last_validation")
-        assert_type(m["validation"]["independent_validation"], bool, f"model:{m_id}.validation.independent_validation")
+        assert_type(
+            m["validation"]["independent_validation"],
+            bool,
+            f"model:{m_id}.validation.independent_validation",
+        )
 
 
 def validate_control_references():
@@ -189,9 +214,17 @@ def validate_kpi_kri_schema():
             raise AssertionError(f"kpi_kri_schema.properties missing {section}")
         section_obj = data["properties"][section]
         assert_type(section_obj, dict, f"kpi_kri_schema.properties.{section}")
-        assert_keys(section_obj, ["type", "properties", "required"], f"kpi_kri_schema.properties.{section}")
-        assert_type(section_obj["properties"], dict, f"kpi_kri_schema.properties.{section}.properties")
-        assert_non_empty_list(section_obj["required"], f"kpi_kri_schema.properties.{section}.required")
+        assert_keys(
+            section_obj, ["type", "properties", "required"], f"kpi_kri_schema.properties.{section}"
+        )
+        assert_type(
+            section_obj["properties"],
+            dict,
+            f"kpi_kri_schema.properties.{section}.properties",
+        )
+        assert_non_empty_list(
+            section_obj["required"], f"kpi_kri_schema.properties.{section}.required"
+        )
 
 
 def validate_rego_policy():
@@ -207,8 +240,9 @@ def validate_rego_policy():
 
 
 def validate_zk_proofs():
-    """Validate ZK proofs against their schema."""
+    """Validate ZK proofs against their schema and check business constraints."""
     from jsonschema import validate
+
     schema = load_json(ROOT / "zk" / "proof_statement_schema.json")
     zk_dir = ROOT / "zk"
     proofs = list(zk_dir.glob("*.json"))
@@ -219,6 +253,17 @@ def validate_zk_proofs():
             continue
         data = load_json(proof_path)
         validate(instance=data, schema=schema)
+        if "Demographic Parity" in data.get("statement", ""):
+            for input_str in data.get("public_inputs", []):
+                if input_str.startswith("actual_delta:"):
+                    try:
+                        delta = float(input_str.split(":")[1])
+                        if delta > 0.05:
+                            raise AssertionError(
+                                f"{proof_path.name}: delta {delta} exceeds limit 0.05"
+                            )
+                    except (ValueError, IndexError):
+                        raise AssertionError(f"{proof_path.name}: invalid actual_delta format")
 
 
 def validate_cae_specification():
@@ -227,9 +272,42 @@ def validate_cae_specification():
     if not spec_path.exists():
         raise AssertionError(f"CAE specification missing at {spec_path}")
     data = load_yaml(spec_path)
-    assert_keys(data, ["specification_version", "last_updated", "cae_definition"], "cae_specification")
+    assert_keys(
+        data, ["specification_version", "last_updated", "cae_definition"], "cae_specification"
+    )
     assert_keys(data["cae_definition"], ["name", "description", "fields"], "cae_definition")
     assert_non_empty_list(data["cae_definition"]["fields"], "cae_definition.fields")
+
+
+def validate_cae_envelopes():
+    """Validate Contextual Attribution Envelopes."""
+    cae_dir = ROOT / "interpretability"
+    envelopes = list(cae_dir.glob("cae_envelope.json"))
+    if not envelopes:
+        return
+    for env_path in envelopes:
+        data = load_json(env_path)
+        assert_keys(
+            data,
+            [
+                "attribution_source",
+                "context_window",
+                "ethical_hash",
+                "attribution_score",
+                "timestamp",
+            ],
+            "cae_envelope",
+        )
+        assert_type(data["attribution_score"], float, "cae_envelope.attribution_score")
+        if not (0.0 <= data["attribution_score"] <= 1.0):
+            raise AssertionError("cae_envelope.attribution_score must be between 0 and 1")
+        ts_str = data["timestamp"]
+        try:
+            ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+            if (datetime.now(timezone.utc) - ts).days > 7:
+                raise AssertionError("cae_envelope.timestamp is stale (older than 7 days)")
+        except ValueError:
+            raise AssertionError(f"invalid timestamp format: {ts_str}")
 
 
 def run_all_checks() -> dict[str, str]:
@@ -256,24 +334,50 @@ def run_selected_checks(check_names: list[str]) -> dict[str, str]:
     return results
 
 
+def output_report(status: str, args: argparse.Namespace, checks=None, error=None):
+    """Handle report output."""
+    payload = {"status": status, "generated_at_utc": datetime.now(timezone.utc).isoformat()}
+    if checks:
+        payload["checks"] = checks
+    if error:
+        payload["error"] = str(error)
+    if args.output:
+        out = Path(args.output)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    if args.json:
+        print(json.dumps(payload, indent=2))
+    elif status == "PASS" and not args.quiet:
+        print("Governance artifacts validation: PASS")
+    elif status == "FAIL":
+        print(f"Governance artifacts validation: FAIL - {error}")
+
+
 def main(argv: list[str] | None = None):
     """Entry point for the validator script."""
     parser = argparse.ArgumentParser(description="Validate governance artifacts.")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON output.")
-    parser.add_argument("--quiet", action="store_true", help="Suppress success output; failures still print.")
-    parser.add_argument("--output", type=str, default="", help="Optional file path to write JSON result payload.")
-    parser.add_argument("--list-checks", action="store_true", help="List available check names and exit.")
-    parser.add_argument("--check", action="append", default=[], help="Run only the named check(s); repeatable.")
+    parser.add_argument(
+        "--quiet", action="store_true", help="Suppress success output; failures still print."
+    )
+    parser.add_argument(
+        "--output", type=str, default="", help="Optional file path to write JSON result payload."
+    )
+    parser.add_argument(
+        "--list-checks", action="store_true", help="List available check names and exit."
+    )
+    parser.add_argument(
+        "--check", action="append", default=[], help="Run only the named check(s); repeatable."
+    )
     parser.add_argument("--version", action="store_true", help="Print validator version and exit.")
     args = parser.parse_args(argv)
-
     if args.version:
+        v_payload = {"version": VALIDATOR_VERSION}
         if args.json:
-            print(json.dumps({"version": VALIDATOR_VERSION}, indent=2))
+            print(json.dumps(v_payload, indent=2))
         else:
             print(VALIDATOR_VERSION)
         return
-
     if args.list_checks:
         checks = [name for name, _ in get_checks()]
         if args.json:
@@ -282,36 +386,11 @@ def main(argv: list[str] | None = None):
             for check in checks:
                 print(check)
         return
-
     try:
         results = run_selected_checks(args.check) if args.check else run_all_checks()
-        payload = {
-            "status": "PASS",
-            "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-            "checks": results,
-        }
-        if args.output:
-            out = Path(args.output)
-            out.parent.mkdir(parents=True, exist_ok=True)
-            out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-        if args.json:
-            print(json.dumps(payload, indent=2))
-        elif not args.quiet:
-            print("Governance artifacts validation: PASS")
+        output_report("PASS", args, checks=results)
     except Exception as exc:  # pylint: disable=broad-except
-        payload = {
-            "status": "FAIL",
-            "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-            "error": str(exc),
-        }
-        if args.output:
-            out = Path(args.output)
-            out.parent.mkdir(parents=True, exist_ok=True)
-            out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-        if args.json:
-            print(json.dumps(payload, indent=2))
-        else:
-            print(f"Governance artifacts validation: FAIL - {exc}")
+        output_report("FAIL", args, error=exc)
         raise SystemExit(1) from exc
 
 
