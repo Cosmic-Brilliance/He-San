@@ -1,5 +1,4 @@
 "use client";
-import classNames from 'classnames';
 
 export interface GovernanceMeta {
   use_case: string;
