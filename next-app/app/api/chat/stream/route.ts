@@ -29,9 +29,9 @@ async function handleStream(message: string) {
 
   let reply = "";
   if (governance && governance.risk_tier === "high") {
-     reply = `[GOVERNED RESPONSE - HIGH RISK CREDIT]\nProcessing request with verified attestations for MAS FEAT and HKMA Ethics.\n\nResponse: ${message.slice(0, 50)}...`;
+     reply = `[GOVERNED RESPONSE - HIGH RISK CREDIT]\nProcessing request with verified attestations for MAS FEAT and HKMA Ethics.\n\nResponse: ${safePrompt.slice(0, 50)}...`;
   } else {
-     reply = `Governed Reply: ${message.slice(0, 50)}...`;
+     reply = `Governed Reply: ${safePrompt.slice(0, 50)}...`;
   }
 
   const post = postModerate(reply);
